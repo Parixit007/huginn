@@ -25,7 +25,7 @@ version (1) ‖ kind (1) ‖ hops_left (1) ‖ packet_id (8) ‖ sender_id (8) �
 ```
 
 - `version` = 1. Unknown versions are dropped.
-- `kind`: 1 = DATA, 2 = HANDSHAKE. HANDSHAKE packets are **never relayed**.
+- `kind`: 1 = DATA, 2 = HANDSHAKE, 3 = LINK. HANDSHAKE and LINK packets are **never relayed** (direct neighbours only).
 - `hops_left`: the sender sets 8. Each relay subtracts 1 and forwards only if the result is ≥ 1, so a packet crosses at most 8 links (D8).
 - DATA `body` = `nonce (24) ‖ ciphertext ‖ tag (16)`. The **authenticated data** (AAD) is the header without `hops_left`: `version ‖ kind ‖ packet_id ‖ sender_id ‖ recipient_id`.
 - Outer header = 27 B; DATA overhead = 27 + 24 + 16 = **67 B**.
@@ -35,6 +35,10 @@ version (1) ‖ kind (1) ‖ hops_left (1) ‖ packet_id (8) ‖ sender_id (8) �
 ```
 type (1) ‖ message_id (16) ‖ counter (8) ‖ timestamp (8) ‖ content_length (2) ‖ content ‖ zero padding
 ```
+
+`counter` only advances for chat content (TEXT, REACTION, PROFILE, IMAGE_MANIFEST). Control packets (receipts, chunk requests) carry `counter` = 1. Image chunks carry their manifest's counter.
+
+Photos are cut into pieces of **459 bytes**, so every IMAGE_CHUNK inner packet fills exactly the 512-byte padding step (a 50 KB photo = 112 chunks).
 
 The whole inner packet is padded with zeros to the next **padding bucket**: 128, 256, 512, 1024, 2048, 4096 or 8192 bytes (D46). The inner header is 35 B, so the largest content is 8157 B. That is enough for 2,000 characters (≤ ~6 KB, D28).
 
@@ -91,7 +95,19 @@ aad(type)  = "MSH1 hs" ‖ type ‖ session_id ‖ A_id ‖ B_id     (authentica
 4. Temporary private keys are wiped after CONFIRM/DECLINE or after 5 minutes.
 5. A photo of the QR code reveals only public data.
 
-## 6. Parsing rules (all decoders)
+## 6. LINK packets (neighbours only, D71)
+
+Used when two phones meet, so a carrier hands over only what the other phone lacks (D66). Body, at most 512 bytes:
+```
+link_type (1) ‖ count (1) ‖ packet_ids (8 each, at most 63)
+```
+- `link_type` 1 = OFFER: "I'm carrying these packets".
+- `link_type` 2 = WANT: "send me these", a subset of an OFFER.
+- Neither carries any content; packet IDs are already visible on the air.
+- An **empty OFFER** is sent when a link comes up, even if nothing is carried. It works as a "hello", so the neighbour learns our device ID.
+- `recipient_id` is the neighbour's ID once known, otherwise all zeros ("whoever is on this link").
+
+## 7. Parsing rules (all decoders)
 
 - Every length is checked against the remaining bytes before reading. Unknown `version`, `kind` or `type` → drop.
 - Nicknames: at most **32 characters** (Unicode code points, so ≤ 128 bytes of UTF-8), not empty, with control, invisible and direction-flipping characters removed (H6).

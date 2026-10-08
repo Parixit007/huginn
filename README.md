@@ -79,9 +79,25 @@ An offline-first, end-to-end encrypted Android messenger (in the spirit of bitch
 | D60 | QR text format | `MSH1:` + Base45 | ✅ |
 | D61 | Test framework | JUnit 6.1.3 (Jazzer fuzzing confirmed compatible) | ✅ |
 | D62 | Code checker | detekt 2.0 alpha (stable 1.23.8 can't run on Java 25) | ✅ |
-| D63 | detekt rule tweak | `ReturnCount.excludeGuardClauses: true`: early "reject bad input" exits don't count | 🟡 |
+| D63 | detekt rule tweak | `ReturnCount.excludeGuardClauses: true`: early "reject bad input" exits don't count | ✅ |
 | D64 | Timer retry | While the sender has at least one phone nearby, pending messages also retry on a slow timer (e.g. 2 min, slowing to 30 min), not only when a new phone appears. Catches friends who appear 2+ hops away. | ✅ |
-| D65 | Store-and-forward | **In v1** (owner decision 2026-10-08; supersedes D6). Phones carry other people's encrypted messages for a while and hand them on when they meet new phones. Details (hold time, what is carried, storage cap, memory vs disk, opt-out, cleanup on delivery) to be decided before Phase 2. | ✅ |
+| D65 | Store-and-forward | **In v1** (owner decision 2026-10-08; supersedes D6). Phones carry other people's encrypted messages for a while and hand them on when they meet new phones. Details: D66–D71. | ✅ |
+| D66 | Carry rule | **Carry until passed on, then drop.** A phone that has other neighbours forwards immediately and stores nothing; only a phone with nobody else around stores the message, hands it to the next phone it meets, then drops it. No "got it" notices. The sender keeps its own copy and retries (D9, D43, D64). | ✅ |
+| D67 | Carry time | Up to **3 days per carrier** (so a message can travel up to ~24 days across 8 carriers) | ✅ |
+| D68 | What is carried | Everything, including photos and avatars | ✅ |
+| D69 | Carried storage | Up to **100 MB**, oldest dropped first. Stored on disk, encrypted with a key that exists **only in memory**: a restart or power-off makes the files unreadable, and they are deleted at startup. | ✅ |
+| D70 | Carrying opt-out | None: always on, like relaying (D7) | ✅ |
+| D71 | LINK packets | New packet kind for neighbours only (never relayed): OFFER ("I can give you these packet IDs") and WANT ("I need these"), so a carrier never wastes its handover | ✅ |
+| D72 | Phase 2 starting values | Receipt wait 30 s, then up to 3 resends · timer retry 2 → 30 min · seen packet IDs kept 3 days · 100 packets/s per neighbour · max 4 photos reassembling at once · photo pieces fit the 512-byte padding step (~455 B, ~113 per 50 KB photo) · mesh engine tested on a virtual clock, no new libraries | ✅ |
+| D73 | detekt rule tweak | `TooManyFunctions` counts only a class's public API (`ignorePrivate`, `ignoreOverridden`) | ✅ |
+| D74 | Stalled photo | A photo whose pieces stop arriving stays in reassembly for up to **3 days** (matches the carry time), then the sender's retry restarts it. Trade-off: a stuck photo can hold one of the 4 reassembly slots that long. | ✅ |
+| D75 | Given-up messages | The engine forgets a message once it shows "Not delivered"; the outbox (encrypted database in Phase 3) keeps it, so "Retry" works and a late receipt still marks it delivered | ✅ |
+| D76 | Seen-cache memory | Compact storage: same 200k IDs and 3 days, ~5 MB instead of ~15 MB; secret hash seed against crafted IDs | ✅ |
+| D77 | Replay IDs on chat delete | Received message IDs are **kept** when a chat is deleted (16 bytes each, no content), so recorded old packets can't make deleted messages reappear | ✅ |
+| D78 | Pending after restart | Queued messages and photos are stored in the encrypted database and keep trying after an app restart or reboot; the 3-day limit uses wall-clock time | ✅ |
+| D79 | Phase 3 tooling | Room 2.8.5 + KSP 2.3.12 (build-time only), SQLCipher 4.19.1, tink-android 1.23.0, AndroidX Test (JUnit 4) for on-device tests | ✅ |
+| D80 | Database key | A random 32-byte key, wrapped by an AES-256-GCM key in the Android Keystore; usable after the first unlock (S9) | ✅ |
+| D81 | Storage test devices | Android 13+ only (the Android 17 emulator); no extra downloads. ⚠️ Android 8–12 untested for now although `minSdk` is 26 (D3). | ✅ |
 
 ## 3. Features (v1)
 
@@ -149,7 +165,7 @@ An offline-first, end-to-end encrypted Android messenger (in the spirit of bitch
 - Contact keys are stored inside the encrypted DB.
 - Images are encrypted on disk with Tink and never saved to the public gallery.
 - Android backup and device-to-device transfer of app data are disabled.
-- Relays keep nothing on disk: the "seen" cache lives only in memory. ⚠️ Whether carried messages (D65) may be stored on disk is still to be decided before Phase 2.
+- The relay "seen" cache lives only in memory. Carried messages (D69) sit on disk only encrypted with a memory-only key, so they are unreadable after a restart or power-off.
 - Native libraries must support 16 KB memory pages.
 
 ## 8. Android platform
@@ -193,6 +209,8 @@ An offline-first, end-to-end encrypted Android messenger (in the spirit of bitch
 - Someone holding your **unlocked** phone (no app lock or panic wipe yet).
 - Forensic tools on a **locked but powered-on** phone (the DB is usable after the first unlock).
 - Large-scale flooding or jamming of the mesh. Rate limits help but don't solve it.
+- **Carriers (D65–D69):** for up to 3 days, a stranger's phone may hold your encrypted message together with the plain sender and recipient IDs. While that phone is switched on, someone with forensic tools could read who was messaging whom (not the content). After a restart, nothing is readable.
+- **Late delivery:** a carried message can arrive days after the sender saw "Not delivered".
 - OS-level bugs on old, unpatched phones (Android 8–9).
 
 👉 v1 is a prototype. It should **not** be presented as safe for high-risk users (journalists, activists) until v2.

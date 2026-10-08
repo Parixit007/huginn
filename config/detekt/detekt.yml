@@ -5,6 +5,12 @@ style:
     # Early "reject bad input" exits are the clearest style for parsers and security checks.
     excludeGuardClauses: true
 
+complexity:
+  TooManyFunctions:
+    # Count a class's public API only: private helpers and required interface callbacks don't add surface (D73).
+    ignorePrivate: true
+    ignoreOverridden: true
+
 naming:
   FunctionNaming:
     # Jetpack Compose UI functions are named like classes (PascalCase).

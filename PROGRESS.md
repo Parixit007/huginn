@@ -117,3 +117,114 @@ Decisions before coding: protocol `docs/PROTOCOL.md` approved (D57); padding 128
 - ktlint ✅ · detekt ✅ · Android Lint ✅ · dependency checksums: **442 components** (added Tink 1.23.0, JUnit 6.1.3, Jazzer 0.30.0).
 - Final check after fuzzing: full rebuild with dependency verification on → **BUILD SUCCESSFUL, 65 tests, 0 failures**.
 - detekt config change (needs owner OK): `ReturnCount.excludeGuardClauses: true`, so early "reject bad input" exits don't count as extra returns.
+
+---
+
+## Phase 2 — Mesh engine + simulator (started 2026-10-08)
+
+Gate decisions (2026-10-08):
+- D63 detekt tweak kept.
+- D64 timer retry.
+- D65–D71 store-and-forward: carry until passed on; 3 days per carrier; everything is carried; 100 MB on disk with a memory-only key; always on; LINK OFFER/WANT.
+- D72 starting values.
+
+CI fix first: the first CI run failed on 3 build-tool metadata files missing from the checksum list (cached on the dev Mac before verification existed). A rebuild from an **empty Gradle cache** added 7 checksums (445 components). A strict offline build against that cache passes.
+
+### 2.1 Transport interface ✅ (`:core:transport`)
+- `Transport` (start/stop, links, `send(link, bytes)`), `TransportListener` (link up/down, receive), `Scheduler` (monotonic time + timers, so tests can use a virtual clock).
+
+### 2.2 Simulator ✅ (`:transport:fake`)
+- `VirtualScheduler`: days of mesh time run in milliseconds and repeat exactly.
+- `SimNetwork`: latency, jitter (reordering), packet loss, links up and down, `line` and `crowd` layouts (BLE-like cap of 5 links per phone), a transmissions counter.
+
+### 2.3 Flooding ✅ (`:core:mesh` `Router`)
+- 8-hop limit, a memory-only seen cache (200k IDs / 3 days), forwarding once to every link except the one the packet came from.
+- HANDSHAKE and LINK packets never relayed.
+
+### 2.4–2.5 Reliable delivery & pending ✅ (`Messenger`)
+- Every attempt uses a new packet ID. 30 s receipt wait → up to 3 resends → pending.
+- Retries on a new neighbour or the slow timer (2 → 30 min, D64).
+- After 3 days: NOT_DELIVERED; `retry()` restarts it, and a late receipt still flips it to DELIVERED.
+- Receipts are sent for repeats too, so retries stop. Read receipts are best effort.
+
+### 2.6 Photos ✅
+- A manifest plus 459-byte pieces (exactly the 512-byte padding step).
+- At most 4 reassemblies at once; missing pieces requested after 5 s of silence; hash checked before "delivered".
+- A stalled reassembly is kept up to 3 days (D74, owner decision), then restarts on the sender's retry.
+
+### 2.7 Abuse limits ✅
+- 100 packets/s per neighbour (token bucket), packet size caps (codec), 4 concurrent photos, 100 MB carry cap with oldest dropped first.
+
+### 2.8 Scenarios ✅ (all with fixed seeds)
+| Scenario | Result |
+|---|---|
+| 2 phones: message, delivered tick, read tick | ✅ |
+| Line of 10: 8 hops arrive, 9 never do | ✅ |
+| Crowd of 30, 20% loss per link: every reachable phone gets its message within 1 h; all ticks within 3 h | ✅ |
+| Split network heals: the pending message arrives once a bridge appears | ✅ |
+| 50 KB photo over 20% loss: intact, delivered tick, the relay never sees it | ✅ |
+| Garbage-flooding attacker: 4,900+ of 5,000 junk packets dropped, real message still delivered | ✅ |
+| **Owner's A → B → C store-and-forward** (10 h, 5 h apart): C gets it once; A's tick arrives when B passes A again | ✅ |
+| Timer retry (D64) reaches a friend who appears 2 hops away | ✅ |
+| Carried packets dropped after 3 days | ✅ |
+| Not delivered after 3 days → retry → delivered | ✅ |
+| Strangers relay but can't read | ✅ |
+| No message is ever shown twice (checked in every scenario) | ✅ |
+
+### 2.8b Store-and-forward ✅
+- A phone carries only when it has no other neighbour; OFFER/WANT on meeting; hand over, then drop.
+- Expiry sweep runs hourly. `CarryStore` interface (Phase 3 adds encrypted files with a memory-only key).
+
+### 2.9 Cost report ✅ → `docs/reports/phase-2-cost-report.md`
+- Text + receipt: 16 transmissions on an 8-hop line, ~200 in a crowd of 30.
+- **One 50 KB photo: 8.8 MB on air** in a crowd of 30 (5 hops).
+- The flooding baseline for v1.1.
+
+### Tests & quality
+- **85 tests, 0 failures** (model 15 · crypto 35 · mesh 35). ktlint, detekt, Lint and dependency verification all pass.
+- New fuzz targets, 5 minutes each in fuzzing mode, **0 crashes**: LINK message decoding (~35.7 M inputs); raw bytes into a live mesh node (~0.85 M inputs, slower because each input builds a small mesh).
+- detekt: `TooManyFunctions` counts public API only (D73, approved). `MeshConfig` and the packet-kind codes are marked as intentional numbers.
+
+### Phase 2 follow-ups (2026-10-08, after the owner's clean-up question) ✅
+- Inventory of everything the engine keeps. Most of it was already bounded; fixed:
+  - 🐞 packets on unannounced links created per-link state forever → now ignored (`unknownLink` counter);
+  - 🐞 stalled photo reassemblies were only swept when a new photo arrived → now hourly;
+  - given-up messages were kept in memory forever, photos included → new `Outbox` interface (D75, D78): the engine forgets them, the outbox keeps them, queued messages survive restarts;
+  - seen cache rewritten compactly (D76): ~5 MB instead of ~15 MB at 200k IDs, secret hash seed; checked against a simple reference over 50,000 random operations.
+- New scenarios: clean-up (unannounced link ignored, stalled photo swept after 3 days); a queued message survives a restart, and a given-up one stays retryable across a restart.
+
+---
+
+## Phase 3 — Secure storage (2026-10-08)
+
+Gate decisions: D75–D78 (outbox, compact seen cache, replay IDs kept, pending survives restarts), D79 tooling (Room 2.8.5 + KSP 2.3.12, SQLCipher 4.19.1, tink-android, AndroidX Test/JUnit 4), D80 Keystore-wrapped database key, D81 test on Android 13+ only (the Android 17 emulator).
+
+### 3.1 Encrypted database ✅ (`:data`)
+- `DatabaseKey`: a random 32-byte key, wrapped by an AES-256-GCM key in the Android Keystore; the wrapped copy lives in `noBackupFilesDir`.
+- `Storage.open`: Room on SQLCipher (`mesh.db`).
+- File names and the Keystore alias are brand-neutral (D47).
+
+### 3.2 Tables ✅
+- identity, contacts, messages, outbox, received_ids, counters.
+
+### 3.3 Encrypted files ✅
+- Photos: `EncryptedImageStore` (XChaCha20-Poly1305 via the new `SecretBox`; the file key is kept inside the encrypted DB; the photo ID is bound as associated data, so swapping files fails).
+- Carried packets: `EncryptedFileCarryStore`, with a memory-only key (D69). A new instance deletes everything left over.
+
+### 3.4 Real stores for the mesh engine ✅
+- `RoomReplayGuard`, `RoomCounterStore`, `RoomOutbox`, `RoomContactDirectory` (blocked contacts get no cipher; ciphers cached).
+- `Storage.deleteContact`: removes key, chat, outbox, counters and photo files; keeps replay IDs (D77).
+
+### 3.5 Tests on the Android 17 emulator ✅ — 12 on-device tests, 0 failures
+- The DB file can't be read without the key: no SQLite header, the nickname is not visible, plain SQLite refuses it.
+- A different key can't open it. The wrapped key file is not the key.
+- Data survives a restart.
+- Deleting a contact wipes key, chat, outbox and photos, but keeps replay IDs.
+- The outbox keeps photos and the "given up" flag. Blocked contacts get no cipher.
+- Photos and carried packets are encrypted on disk. A restart makes carried packets unreadable and deletes them. The carry cap drops the oldest first.
+- **End to end:** the real mesh engine on the real database resumes a queued message after an app restart, and Carol receives it.
+- Not tested on a device: "backups contain nothing" (the app module doesn't use storage yet). The manifest rules are guarded since Phase 0; a real backup run is in Phase 6.
+
+### Build & quality
+- JVM tests: model 15 · crypto 37 · mesh 38 (90 total). All green; ktlint, detekt, Lint pass.
+- Dependency checksums: **519 components**, recorded from a clean cache. Strict offline build passes (the CI lesson from Phase 2 applied).

@@ -122,7 +122,7 @@ class OuterPacketTest {
     fun `rejects bad version, kind, hop counts and body sizes`() {
         val good = handshake().encode()
         assertNull(OuterPacket.decode(good.copyOf().also { it[0] = 2 }))
-        assertNull(OuterPacket.decode(good.copyOf().also { it[1] = 3 }))
+        assertNull(OuterPacket.decode(good.copyOf().also { it[1] = 4 })) // 1-3 are DATA, HANDSHAKE, LINK
         assertNull(OuterPacket.decode(good.copyOf().also { it[2] = 0 }))
         assertNull(OuterPacket.decode(good.copyOf().also { it[2] = 9 }))
         assertNull(OuterPacket.decode(good.copyOf(27))) // empty body

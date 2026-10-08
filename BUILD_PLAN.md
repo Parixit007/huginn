@@ -96,7 +96,7 @@ Modules: `:core:transport`, `:transport:fake`, `:core:mesh`.
 | 2.6 | Images: manifest + chunks, reassembly with memory caps, requests for missing chunks, hash check, "delivered" only for the full image. |
 | 2.7 | Abuse limits: rate limit per link, max packet size, max number of images being reassembled at once. |
 | 2.8 | Scenario tests: 2 phones direct · a line of 10 phones (the 8-hop limit holds exactly) · a 30-phone crowd with 20% loss · split network → heal → pending messages arrive · an image under loss · a garbage-flooding attacker gets limited · no message is ever shown twice. |
-| 2.8b | **Store-and-forward** (D65): carriers keep others' encrypted messages, swap "what I carry" lists when they meet, hand over what's missing, and delete copies when the delivery receipt passes by. Plus the slow timer retry (D64). ⏳ details to decide at the Phase 2 gate. |
+| 2.8b | **Store-and-forward (D65–D71)** + timer retry (D64): carry only when no other neighbour; OFFER/WANT exchange on meeting; hand over, then drop; 3 days per carrier; 100 MB cap, oldest dropped; storage behind an interface (Phase 2: in memory; Phase 3: encrypted files with a memory-only key). |
 | 2.9 | **Cost report:** radio transmissions per delivered message/image. This becomes the baseline that v1.1 smart routing must beat. |
 
 **Done when:** all scenarios pass with fixed seeds · you receive the cost report.
@@ -110,7 +110,7 @@ Module: `:data`.
 | 3.2 | Tables: me (ID, nickname, avatar), contacts (keys, names, blocked), messages (unique message IDs, counters, status), pending queue, image metadata. |
 | 3.3 | Encrypted image files (Tink), in app-private storage. |
 | 3.4 | Real implementations of the stores the mesh engine uses (message IDs, pending, contact keys). |
-| 3.5 | Tests on emulators (API 26 + latest): the DB file can't be read without the key · data survives a restart · deleting a contact wipes its keys and chat · backups contain nothing. |
+| 3.5 | Tests on the Android 17 emulator (D81: Android 13+ only for now): the DB file can't be read without the key · data survives a restart · deleting a contact wipes its keys and chat · backups contain nothing. |
 
 **Done when:** tests pass on the oldest and newest Android emulator.
 

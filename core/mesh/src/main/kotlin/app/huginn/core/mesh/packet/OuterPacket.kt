@@ -28,6 +28,7 @@ class OuterPacket(
 
     val body: ByteArray get() = bodyBytes.copyOf()
 
+    @Suppress("MagicNumber") // wire codes from docs/PROTOCOL.md §2
     enum class Kind(
         val code: Int,
     ) {
@@ -36,12 +37,15 @@ class OuterPacket(
 
         /** Pairing message; direct link only, never relayed. */
         HANDSHAKE(2),
+
+        /** Neighbour-to-neighbour OFFER/WANT exchange (D71); direct link only, never relayed. */
+        LINK(3),
         ;
 
         fun bodySizeIsValid(size: Int): Boolean =
             when (this) {
                 DATA -> size - DATA_OVERHEAD in InnerPacket.PADDING_BUCKETS
-                HANDSHAKE -> size in 1..MAX_HANDSHAKE_BODY
+                HANDSHAKE, LINK -> size in 1..MAX_HANDSHAKE_BODY
             }
     }
 
