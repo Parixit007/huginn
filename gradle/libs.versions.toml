@@ -1,0 +1,32 @@
+[versions]
+agp = "9.4.1"
+kotlin = "2.4.20"
+ktlintGradle = "14.2.0"
+ktlint = "1.8.0"
+# detekt 2.0 is still alpha; it is the first line that runs on Java 25 (owner decision 2026-10-07). Move to 2.0 stable when released.
+detekt = "2.0.0-alpha.6"
+# detekt embeds this Kotlin version and must keep it (see root build.gradle.kts).
+detektKotlin = "2.4.10"
+composeBom = "2026.09.00"
+activityCompose = "1.13.0"
+tink = "1.23.0"
+junit = "6.1.3"
+jazzer = "0.30.0"
+
+[libraries]
+androidx-activity-compose = { module = "androidx.activity:activity-compose", version.ref = "activityCompose" }
+compose-bom = { module = "androidx.compose:compose-bom", version.ref = "composeBom" }
+compose-material3 = { module = "androidx.compose.material3:material3" }
+tink = { module = "com.google.crypto.tink:tink", version.ref = "tink" }
+junit-bom = { module = "org.junit:junit-bom", version.ref = "junit" }
+junit-jupiter = { module = "org.junit.jupiter:junit-jupiter" }
+junit-platform-launcher = { module = "org.junit.platform:junit-platform-launcher" }
+jazzer-junit = { module = "com.code-intelligence:jazzer-junit", version.ref = "jazzer" }
+
+[plugins]
+android-application = { id = "com.android.application", version.ref = "agp" }
+android-library = { id = "com.android.library", version.ref = "agp" }
+kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
+kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
+ktlint = { id = "org.jlleitschuh.gradle.ktlint", version.ref = "ktlintGradle" }
+detekt = { id = "dev.detekt", version.ref = "detekt" }

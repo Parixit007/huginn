@@ -1,0 +1,11 @@
+# Starts from detekt's default rules (buildUponDefaultConfig = true); only differences are listed here.
+
+style:
+  ReturnCount:
+    # Early "reject bad input" exits are the clearest style for parsers and security checks.
+    excludeGuardClauses: true
+
+naming:
+  FunctionNaming:
+    # Jetpack Compose UI functions are named like classes (PascalCase).
+    ignoreAnnotated: ['Composable']

@@ -1,0 +1,24 @@
+# Gradle / build output
+.gradle/
+.kotlin/
+build/
+/captures/
+.externalNativeBuild/
+.cxx/
+
+# IDE and OS
+.idea/
+*.iml
+.DS_Store
+
+# Machine-specific settings (SDK path)
+local.properties
+
+# Signing material: never commit keys or their passwords
+*.jks
+*.keystore
+keystore.properties
+signing.properties
+
+# Fuzzing working corpus (crash reproducers are committed as test resources instead)
+.cifuzz-corpus/
