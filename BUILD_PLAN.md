@@ -57,7 +57,7 @@
 | Step | What |
 |---|---|
 | 0.1 | 👤 You finish the Android Studio setup (SDK, emulator) and enable USB debugging on your phone. |
-| 0.2 | Version control: `git init`; `.gitignore` (build outputs, `local.properties`, keystores and signing files); MIT `LICENSE` (P7); local-only files excluded via `.git/info/exclude`. I create the empty **public** GitHub repo `huginn` with `gh`, after showing you the exact command. 👤 You make the first commit and push. |
+| 0.2 | Version control: `git init`; `.gitignore` (build outputs, `local.properties`, keystores and signing files); MIT `LICENSE` (P7); local-only files excluded via `.git/info/exclude`. I create the empty **public** GitHub repo `huginn` (renamed `raven`, D94) with `gh`, after showing you the exact command. 👤 You make the first commit and push. |
 | 0.3 | Gradle skeleton: Kotlin DSL, version catalog, the 8 modules from spec §10 (empty), `minSdk` 26, latest `targetSdk`, Compose. |
 | 0.4 | **Build guards from day 1:** the release build **fails** if the INTERNET permission appears; backup is disabled; dependency checksums are verified; Android Lint + ktlint + detekt run. |
 | 0.5 | CI (GitHub Actions): build + all tests + Lint/ktlint/detekt on every push. |
@@ -182,7 +182,7 @@ Modules: `:transport:ble`, plus the service in `:app`.
 | # | Needed by | Decision | Status |
 |---|---|---|---|
 | P0 | now | Phase order and "Done when" criteria approved as written | ✅ |
-| P1 | Phase 0 | **Public** GitHub repo named `huginn`, created by me with `gh` after you approve the exact command | ✅ |
+| P1 | Phase 0 | **Public** GitHub repo named `huginn` (renamed `raven` on 2026-10-09, D94), created by me with `gh` after you approve the exact command | ✅ |
 | P2 | Phase 0 | CI on every push (GitHub Actions) | ✅ |
 | P3 | Phase 0 | Tooling: latest stable Kotlin/AGP/Gradle on Studio's JDK · JUnit 5 + coroutines-test · Jazzer · CameraX + ZXing · `PROGRESS.md` step log · Android Lint + ktlint + detekt | ✅ |
 | P4 | Phases 4–5 | Test aids: **Mac as a Bluetooth test peer** (Python radio + our Kotlin core). No simulated friends in debug builds. | ✅ |

@@ -11,7 +11,7 @@ One entry per build-plan step: what was done, files, test results, decisions. Ne
 - Owner's phone: not connected yet (needed for step 0.7).
 
 ### 0.2 Version control ✅
-- `git init` (branch `main`). The public repo https://github.com/Parixit007/huginn was created and added as `origin`. The owner commits and pushes.
+- `git init` (branch `main`). The public repo https://github.com/Parixit007/huginn (renamed https://github.com/Parixit007/raven on 2026-10-09) was created and added as `origin`. The owner commits and pushes.
 - Files: `.gitignore` (build output, IDE files, `local.properties`, keystores/signing files, fuzz corpus), `LICENSE` (MIT, Parixit007).
 - Local-only files are excluded through `.git/info/exclude`, which is not part of the repo.
 
@@ -287,4 +287,4 @@ Gate decisions: D82 "Not confirmed yet — retry?", D84 home screen, D85 raven i
 - Unchanged on purpose: protocol identifiers (D47), database and key file names, Keystore aliases. Checked by diffing every renamed file: only names, packages and on-screen text changed.
 - Clean strict build, 90 JVM tests and the 18 device tests on the Android 17 emulator all pass.
 - Clean install of `app.raven.mesh` on the owner's phone (the old `app.huginn.mesh` was removed) and on the virtual phone.
-- 👤 Left for the owner: rename the GitHub repo `huginn` → `raven` (GitHub redirects the old URL). The repo name in BUILD_PLAN P1 and the progress log will be updated after that.
+- GitHub repo renamed `huginn` → `raven` with `gh`, after the owner's OK; the old URL redirects. The local remote points to the new URL.

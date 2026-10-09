@@ -110,7 +110,7 @@ An offline-first, end-to-end encrypted Android messenger (in the spirit of bitch
 | D91 | Test tooling on Android 17 | Device UI tests pin Espresso 3.7.0 (test-only, never in the app): the 3.5.0 that Compose's test kit brings crashes on Android 17 | ✅ |
 | D92 | UI tests on the owner's MIUI phone | MIUI blocks test screens by default; before a phone run, the "Display pop-up windows while running in the background" permission is switched on for the Raven debug build only, via adb, and switched back off after the run | ✅ |
 | D93 | Colours | Lime accent on every phone, like WhatsApp's green (owner decision 2026-10-09; supersedes D83). All Material 3 roles built from the icon's lime #C3E24F; follows light/dark. Plain top bar; lime + button, send button, avatars, unread badges and main buttons, all with dark text; my bubbles pale lime (deep olive in dark mode); small text accents deep lime-olive #516601 in light mode, since lime text on white is unreadable (1.4:1) | ✅ |
-| D94 | Name: **Raven** | Renamed everywhere (owner decision 2026-10-09; supersedes D32/D33): launcher label and on-screen text, package ID `app.raven.mesh`, code packages `app.raven.*`, docs. Still a working name until a trademark check (open item). Protocol identifiers unchanged (D47). The owner renames the GitHub repo `huginn` | ✅ (working) |
+| D94 | Name: **Raven** | Renamed everywhere (owner decision 2026-10-09; supersedes D32/D33): launcher label and on-screen text, package ID `app.raven.mesh`, code packages `app.raven.*`, docs. Still a working name until a trademark check (open item). Protocol identifiers unchanged (D47). GitHub repo renamed `huginn` → `raven` | ✅ (working) |
 
 ## 3. Features (v1)
 
