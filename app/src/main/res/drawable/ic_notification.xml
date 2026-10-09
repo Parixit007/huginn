@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Status-bar icon: the app's raven (D85), single colour. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <group
+        android:translateX="-14"
+        android:translateY="-18"
+        android:scaleX="1.25"
+        android:scaleY="1.25">
+        <path
+            android:fillColor="#FFFFFFFF"
+            android:pathData="M57,31 C62,25 71,25 75,31 L87,36.5 L76,40 C75.5,46 72,51 67,55 C62,61 55,67 47,70 L28,82 L32,74 L23,77 C31,68 37,60 39,52 C41,42 48,33 57,31 Z" />
+    </group>
+</vector>

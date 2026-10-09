@@ -76,10 +76,12 @@ internal class Messenger(
         to: DeviceId,
         bytes: ByteArray,
         purpose: Content.Purpose,
+        imageId: ImageId?,
     ): MessageId {
         require(bytes.size in 1..purpose.maxBytes) { "image must be 1..${purpose.maxBytes} bytes" }
         val chunkCount = (bytes.size + CHUNK_DATA_SIZE - 1) / CHUNK_DATA_SIZE
-        val manifest = Content.ImageManifest(ImageId.random(random), bytes.size, chunkCount, sha256(bytes), purpose)
+        val id = imageId ?: ImageId.random(random)
+        val manifest = Content.ImageManifest(id, bytes.size, chunkCount, sha256(bytes), purpose)
         return enqueue(to, manifest, bytes)
     }
 

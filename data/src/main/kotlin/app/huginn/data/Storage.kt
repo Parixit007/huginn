@@ -56,6 +56,24 @@ class Storage private constructor(
         return identity
     }
 
+    fun setOwnAvatar(avatar: ByteArray?) {
+        val identity = checkNotNull(identity()) { "no identity yet" }
+        database.identity().put(
+            IdentityEntity(identity.slot, identity.deviceId, identity.nickname, avatar, identity.fileKey),
+        )
+    }
+
+    /** Profile editing (spec §3, D42). */
+    fun setOwnProfile(
+        nickname: Nickname,
+        avatar: ByteArray?,
+    ) {
+        val identity = checkNotNull(identity()) { "no identity yet" }
+        database.identity().put(
+            IdentityEntity(identity.slot, identity.deviceId, nickname.value, avatar, identity.fileKey),
+        )
+    }
+
     /** The mesh engine's view of contacts (blocked ones excluded, D30). */
     @Synchronized
     fun contactDirectory(): RoomContactDirectory {

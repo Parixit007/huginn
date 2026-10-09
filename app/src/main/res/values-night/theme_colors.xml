@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Huginn's colours in dark mode (D93). On dark backgrounds the lime itself is readable, so it is the accent. -->
+<resources>
+    <color name="theme_primary">#C3E24F</color>
+    <color name="theme_on_primary">#2A3400</color>
+    <color name="theme_primary_container">#C3E24F</color>
+    <color name="theme_on_primary_container">#1A1D01</color>
+    <color name="theme_inverse_primary">#516601</color>
+    <color name="theme_secondary">#C5CAA8</color>
+    <color name="theme_on_secondary">#2E3318</color>
+    <!-- Also my chat bubbles: deep olive (D93). -->
+    <color name="theme_secondary_container">#3C4D00</color>
+    <color name="theme_on_secondary_container">#E2E3DB</color>
+    <color name="theme_tertiary">#84D6C0</color>
+    <color name="theme_on_tertiary">#01382D</color>
+    <color name="theme_tertiary_container">#025142</color>
+    <color name="theme_on_tertiary_container">#A0F2DC</color>
+    <color name="theme_background">#13140D</color>
+    <color name="theme_on_background">#E2E3DB</color>
+    <color name="theme_surface">#13140D</color>
+    <color name="theme_on_surface">#E2E3DB</color>
+    <color name="theme_surface_variant">#46483A</color>
+    <color name="theme_on_surface_variant">#C6C8B7</color>
+    <color name="theme_inverse_surface">#E2E3DB</color>
+    <color name="theme_inverse_on_surface">#30312B</color>
+    <color name="theme_error">#FFB4AB</color>
+    <color name="theme_on_error">#690005</color>
+    <color name="theme_error_container">#93000A</color>
+    <color name="theme_on_error_container">#FFDAD6</color>
+    <color name="theme_outline">#909282</color>
+    <color name="theme_outline_variant">#46483A</color>
+    <color name="theme_scrim">#000000</color>
+    <color name="theme_surface_bright">#393A34</color>
+    <color name="theme_surface_dim">#13140D</color>
+    <color name="theme_surface_container_lowest">#0E0F06</color>
+    <color name="theme_surface_container_low">#1B1C17</color>
+    <color name="theme_surface_container">#1F201A</color>
+    <color name="theme_surface_container_high">#2A2A25</color>
+    <color name="theme_surface_container_highest">#34352F</color>
+</resources>

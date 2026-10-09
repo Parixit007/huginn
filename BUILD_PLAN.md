@@ -119,11 +119,11 @@ Module: `:app`.
 
 | Step | What |
 |---|---|
-| 4.1 | Navigation, Material 3 theme (light/dark). |
+| 4.1 | Navigation, Material 3 theme (light/dark) in Huginn's lime (D93). |
 | 4.2 | Onboarding: nickname; avatar (192 px, ≤ 20 KB); device ID; permission explainers per Android version; battery-settings guide. |
 | 4.3 | Contacts: list, delete, block, re-pair. |
 | 4.4 | Pairing: show QR, scan with the in-app camera (CameraX + ZXing), compare codes, Accept/Reject (tapjacking-safe), countdown to expiry. |
-| 4.5 | Chat: text (≤ 2,000), reactions, images (metadata stripped, re-encoded ≤ 50 KB), status ticks, "Not delivered — retry?", incognito keyboard. |
+| 4.5 | Chat: text (≤ 2,000), reactions, images (metadata stripped, re-encoded ≤ 50 KB), status ticks, "Not confirmed yet — retry?" (D82), incognito keyboard. |
 | 4.6 | Profile editing (the update goes to all contacts). |
 | 4.7 | Notifications: sender name only. |
 | 4.8 | Nearby count. |

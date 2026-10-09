@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--
+        The window behind the Compose screens (D93): the background shown while the app starts, and the
+        accent of the classic message field (cursor and selection handles). Dark version in values-night.
+    -->
+    <style name="Theme.Huginn" parent="android:Theme.Material.Light.NoActionBar">
+        <item name="android:colorPrimary">@color/theme_primary</item>
+        <item name="android:colorAccent">@color/theme_primary</item>
+        <item name="android:windowBackground">@color/theme_surface</item>
+        <item name="android:windowLightStatusBar">true</item>
+    </style>
+</resources>

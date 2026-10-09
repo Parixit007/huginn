@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Dark version of the window theme (D93). -->
+    <style name="Theme.Huginn" parent="android:Theme.Material.NoActionBar">
+        <item name="android:colorPrimary">@color/theme_primary</item>
+        <item name="android:colorAccent">@color/theme_primary</item>
+        <item name="android:windowBackground">@color/theme_surface</item>
+        <item name="android:windowLightStatusBar">false</item>
+    </style>
+</resources>

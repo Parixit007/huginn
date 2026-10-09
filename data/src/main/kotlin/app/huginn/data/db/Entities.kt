@@ -25,7 +25,10 @@ class ContactEntity(
     val addedAt: Long,
 )
 
-/** Chat history. Photos are stored as encrypted files named by [imageId]. */
+/**
+ * Chat history. Photos are stored as encrypted files named by [imageId]. [type] uses the content type codes
+ * from docs/PROTOCOL.md §3 (1 text, 2 reaction, 5 photo). [status] is a [MessageStatus] code.
+ */
 @Entity(tableName = "messages", indices = [Index("peerId")])
 class MessageEntity(
     @PrimaryKey val messageId: ByteArray,
@@ -65,3 +68,26 @@ class CounterEntity(
     @PrimaryKey val peerId: ByteArray,
     val last: Long,
 )
+
+/** Values of [MessageEntity.status]. Outgoing: pending → sent → delivered → read, or not confirmed (D82). */
+object MessageStatus {
+    const val PENDING = 0 // outgoing: queued · incoming: unread
+    const val SENT = 1
+    const val DELIVERED = 2
+    const val READ = 3 // outgoing: read by them · incoming: read by me
+    const val NOT_CONFIRMED = 4
+
+    /**
+     * Ticks only move forward (⏳ → ✓ → ✓✓ → 👁), except that "not confirmed" can still become delivered or
+     * read when a late receipt arrives (D82), and a retry resets it.
+     */
+    fun isUpgrade(
+        current: Int,
+        next: Int,
+    ): Boolean =
+        when {
+            current == NOT_CONFIRMED -> next == DELIVERED || next == READ
+            next == NOT_CONFIRMED -> current == PENDING || current == SENT
+            else -> next > current
+        }
+}

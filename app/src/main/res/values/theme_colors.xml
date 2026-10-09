@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Huginn's colours (D93): every Material 3 role, built from the icon's lime (#C3E24F, hue 114.5).
+    Light mode here, dark mode in values-night. Lime itself is too light for text on white, so in
+    light mode it is a fill (buttons, badges, avatars) and text accents use a deep lime-olive.
+-->
+<resources>
+    <color name="theme_primary">#516601</color>
+    <color name="theme_on_primary">#FFFFFF</color>
+    <color name="theme_primary_container">#C3E24F</color>
+    <color name="theme_on_primary_container">#1A1D01</color>
+    <color name="theme_inverse_primary">#B9D15B</color>
+    <color name="theme_secondary">#5C6143</color>
+    <color name="theme_on_secondary">#FFFFFF</color>
+    <!-- Also my chat bubbles: pale lime (D93). -->
+    <color name="theme_secondary_container">#E9F4B0</color>
+    <color name="theme_on_secondary_container">#1A1D01</color>
+    <color name="theme_tertiary">#0E6B59</color>
+    <color name="theme_on_tertiary">#FFFFFF</color>
+    <color name="theme_tertiary_container">#A0F2DC</color>
+    <color name="theme_on_tertiary_container">#012019</color>
+    <color name="theme_background">#F9FAF2</color>
+    <color name="theme_on_background">#1B1C17</color>
+    <color name="theme_surface">#F9FAF2</color>
+    <color name="theme_on_surface">#1B1C17</color>
+    <color name="theme_surface_variant">#E2E4D3</color>
+    <color name="theme_on_surface_variant">#46483A</color>
+    <color name="theme_inverse_surface">#30312B</color>
+    <color name="theme_inverse_on_surface">#F0F1EA</color>
+    <color name="theme_error">#BA1A1A</color>
+    <color name="theme_on_error">#FFFFFF</color>
+    <color name="theme_error_container">#FFDAD6</color>
+    <color name="theme_on_error_container">#410002</color>
+    <color name="theme_outline">#767869</color>
+    <color name="theme_outline_variant">#C6C8B7</color>
+    <color name="theme_scrim">#000000</color>
+    <color name="theme_surface_bright">#F9FAF2</color>
+    <color name="theme_surface_dim">#DADBD3</color>
+    <color name="theme_surface_container_lowest">#FFFFFF</color>
+    <color name="theme_surface_container_low">#F3F4EC</color>
+    <color name="theme_surface_container">#EEEEE7</color>
+    <color name="theme_surface_container_high">#E8E9E1</color>
+    <color name="theme_surface_container_highest">#E2E3DB</color>
+
+    <!-- "Fixed" roles are the same in light and dark mode. -->
+    <color name="theme_primary_fixed">#D6ED76</color>
+    <color name="theme_primary_fixed_dim">#B9D15B</color>
+    <color name="theme_on_primary_fixed">#1A1D01</color>
+    <color name="theme_on_primary_fixed_variant">#3C4D00</color>
+    <color name="theme_secondary_fixed">#E1E6C3</color>
+    <color name="theme_secondary_fixed_dim">#C5CAA8</color>
+    <color name="theme_on_secondary_fixed">#1A1D01</color>
+    <color name="theme_on_secondary_fixed_variant">#44492D</color>
+    <color name="theme_tertiary_fixed">#A0F2DC</color>
+    <color name="theme_tertiary_fixed_dim">#84D6C0</color>
+    <color name="theme_on_tertiary_fixed">#012019</color>
+    <color name="theme_on_tertiary_fixed_variant">#025142</color>
+</resources>

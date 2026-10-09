@@ -155,7 +155,9 @@ class MeshNode(
         to: DeviceId,
         bytes: ByteArray,
         purpose: Content.Purpose = Content.Purpose.CHAT_IMAGE,
-    ): MessageId = messenger.sendImage(to, bytes, purpose)
+        /** Give an avatar a known ID so a PROFILE message can refer to it (D42); otherwise random. */
+        imageId: ImageId? = null,
+    ): MessageId = messenger.sendImage(to, bytes, purpose, imageId)
 
     fun markRead(
         from: DeviceId,

@@ -20,9 +20,10 @@ android {
 
 dependencies {
     implementation(project(":core:mesh"))
-    implementation(libs.room.runtime)
+    api(libs.room.runtime)
     ksp(libs.room.compiler)
     implementation(libs.sqlcipher.android)
+    api(libs.kotlinx.coroutines.android)
     // Supplies the Tink classes :core:crypto compiles against, in their Android form.
     implementation(libs.tink.android)
 

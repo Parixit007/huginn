@@ -98,6 +98,18 @@ An offline-first, end-to-end encrypted Android messenger (in the spirit of bitch
 | D79 | Phase 3 tooling | Room 2.8.5 + KSP 2.3.12 (build-time only), SQLCipher 4.19.1, tink-android 1.23.0, AndroidX Test (JUnit 4) for on-device tests | ✅ |
 | D80 | Database key | A random 32-byte key, wrapped by an AES-256-GCM key in the Android Keystore; usable after the first unlock (S9) | ✅ |
 | D81 | Storage test devices | Android 13+ only (the Android 17 emulator); no extra downloads. ⚠️ Android 8–12 untested for now although `minSdk` is 26 (D3). | ✅ |
+| D82 | Given-up wording | **"Not confirmed yet — retry?"** (a carrier may still deliver it; flips to ✓✓ on a late receipt). Replaces "Not delivered" in the UI. | ✅ |
+| D83 | Colours | ~~Material 3 dynamic colour from the wallpaper (Android 12+), neutral fallback; follows light/dark~~ → superseded by D93 | ✅ |
+| D84 | Home screen | Chat list with last message and ticks; a + button opens Show QR / Scan QR; profile in the top menu; nearby count in the top bar | ✅ |
+| D85 | App icon | A raven, olive bird on a lime background (placeholder until the final name) | ✅ |
+| D86 | UI libraries | Navigation Compose, Lifecycle/ViewModel Compose, CameraX + ZXing, Android photo picker, AndroidX emoji picker; no dependency-injection framework | ✅ |
+| D87 | Reactions | Quick row 😂 😭 👍 🔥 ❤️ plus a full emoji picker | ✅ |
+| D88 | Sending photos | From the gallery (photo picker) or taken in the app; in-app photos are never saved to the gallery | ✅ |
+| D89 | Permission timing | Bluetooth + notifications during onboarding, each with an explanation; camera at the first QR scan | ✅ |
+| D90 | Owner's phone | Xiaomi Redmi Note 6 Pro, **Android 9**, no security updates since 2020-11: used for testing too (overrides D81's Android 13+ limit for this device); Android 8–12 stay supported | ✅ |
+| D91 | Test tooling on Android 17 | Device UI tests pin Espresso 3.7.0 (test-only, never in the app): the 3.5.0 that Compose's test kit brings crashes on Android 17 | ✅ |
+| D92 | UI tests on the owner's MIUI phone | MIUI blocks test screens by default; before a phone run, the "Display pop-up windows while running in the background" permission is switched on for the Huginn debug build only, via adb, and switched back off after the run | ✅ |
+| D93 | Colours | Lime accent on every phone, like WhatsApp's green (owner decision 2026-10-09; supersedes D83). All Material 3 roles built from the icon's lime #C3E24F; follows light/dark. Plain top bar; lime + button, send button, avatars, unread badges and main buttons, all with dark text; my bubbles pale lime (deep olive in dark mode); small text accents deep lime-olive #516601 in light mode, since lime text on white is unreadable (1.4:1) | ✅ |
 
 ## 3. Features (v1)
 
@@ -105,7 +117,7 @@ An offline-first, end-to-end encrypted Android messenger (in the spirit of bitch
 - **Add contact**: show my QR or scan theirs → request → both compare a 6-digit code → Accept → both phones save the contact.
 - **1-to-1 chat**: text (≤ 2,000 chars), emoji reactions, small images (≤ 50 KB, location and other metadata removed).
 - **Message states**: ⏳ pending → ✓ sent → ✓✓ delivered → 👁 read.
-- **Pending queue**: retries when new phones come into range; after 3 days shows "Not delivered — retry?".
+- **Pending queue**: retries when new phones come into range; after 3 days shows "Not confirmed yet — retry?" (D82).
 - **Profile**: nickname and avatar can be changed at any time; the update reaches all contacts.
 - **Contacts**: delete, block, re-scan to re-pair (replaces the old key).
 - **Background**: the mesh service keeps receiving and relaying with the app closed, and starts again after a reboot.
@@ -210,7 +222,7 @@ An offline-first, end-to-end encrypted Android messenger (in the spirit of bitch
 - Forensic tools on a **locked but powered-on** phone (the DB is usable after the first unlock).
 - Large-scale flooding or jamming of the mesh. Rate limits help but don't solve it.
 - **Carriers (D65–D69):** for up to 3 days, a stranger's phone may hold your encrypted message together with the plain sender and recipient IDs. While that phone is switched on, someone with forensic tools could read who was messaging whom (not the content). After a restart, nothing is readable.
-- **Late delivery:** a carried message can arrive days after the sender saw "Not delivered".
+- **Late delivery:** a carried message can arrive days after the sender saw "Not confirmed yet".
 - OS-level bugs on old, unpatched phones (Android 8–9).
 
 👉 v1 is a prototype. It should **not** be presented as safe for high-risk users (journalists, activists) until v2.

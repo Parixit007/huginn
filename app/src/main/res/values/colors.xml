@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- App icon (D85): olive raven on lime. -->
+    <color name="icon_background">#C3E24F</color>
+    <color name="icon_bird">#5B6E2E</color>
+    <color name="icon_wing">#4A5B24</color>
+    <color name="icon_legs">#3F5222</color>
+</resources>

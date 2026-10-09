@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- App icon (D85). Scaled to sit inside the adaptive-icon safe zone, so every launcher shape shows the whole bird. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <group
+        android:pivotX="55"
+        android:pivotY="54"
+        android:scaleX="0.74"
+        android:scaleY="0.74"
+        android:translateX="-1">
+        <path
+            android:pathData="M52,66 L50,79 M50,79 L46,81 M50,79 L53,81 M58,64 L58,78 M58,78 L54,80 M58,78 L61,80"
+            android:strokeColor="@color/icon_legs"
+            android:strokeLineCap="round"
+            android:strokeWidth="2.4" />
+        <path
+            android:fillColor="@color/icon_bird"
+            android:pathData="M57,31 C62,25 71,25 75,31 L87,36.5 L76,40 C75.5,46 72,51 67,55 C62,61 55,67 47,70 L28,82 L32,74 L23,77 C31,68 37,60 39,52 C41,42 48,33 57,31 Z" />
+        <path
+            android:fillColor="@color/icon_wing"
+            android:pathData="M44,47 C52,46 60,49 64,55 C58,62 50,66 42,68 L33,72 C38,64 41,56 44,47 Z" />
+        <path
+            android:fillColor="@color/icon_background"
+            android:pathData="M69,33.5 m-1.9,0 a1.9,1.9 0,1 1,3.8 0 a1.9,1.9 0,1 1,-3.8 0" />
+    </group>
+</vector>

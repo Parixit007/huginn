@@ -17,6 +17,7 @@ android {
         targetSdk = 37
         versionCode = 1
         versionName = "0.0.1"
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
     buildTypes {
@@ -43,9 +44,28 @@ android {
 }
 
 dependencies {
+    implementation(project(":data"))
+    implementation(project(":core:mesh"))
     implementation(platform(libs.compose.bom))
     implementation(libs.compose.material3)
     implementation(libs.androidx.activity.compose)
+    implementation(libs.navigation.compose)
+    implementation(libs.lifecycle.viewmodel.compose)
+    implementation(libs.lifecycle.runtime.compose)
+    implementation(libs.camera.camera2)
+    implementation(libs.camera.lifecycle)
+    implementation(libs.camera.view)
+    implementation(libs.zxing.core)
+    implementation(libs.emoji.picker)
+
+    androidTestImplementation(platform(libs.compose.bom))
+    androidTestImplementation(libs.compose.ui.test.junit4)
+    androidTestImplementation(libs.androidx.test.runner)
+    androidTestImplementation(libs.androidx.test.junit)
+    androidTestImplementation(libs.androidx.test.espresso.core) // newer than Compose's own, see D91
+    androidTestImplementation(libs.junit4)
+    androidTestImplementation(project(":transport:fake"))
+    debugImplementation(libs.compose.ui.test.manifest)
 }
 
 /**

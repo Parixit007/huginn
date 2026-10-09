@@ -1,6 +1,7 @@
 package app.huginn.transport.fake
 
 import app.huginn.core.transport.LinkId
+import app.huginn.core.transport.Scheduler
 import app.huginn.core.transport.Transport
 import app.huginn.core.transport.TransportListener
 import kotlin.random.Random
@@ -17,7 +18,8 @@ data class LinkConditions(
  * Counts every transmission so the cost report (build plan 2.9) can compare routing strategies.
  */
 class SimNetwork(
-    val scheduler: VirtualScheduler,
+    /** Usually a [VirtualScheduler]; on-device UI tests pass the app's real mesh-thread scheduler. */
+    val scheduler: Scheduler,
     seed: Long,
     var conditions: LinkConditions = LinkConditions(),
 ) {

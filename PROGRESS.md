@@ -55,7 +55,11 @@ One entry per build-plan step: what was done, files, test results, decisions. Ne
 - Six lessons were found for the real Bluetooth layer, among them: `neverForLocation` is required; at most 512 bytes per write; duplicate scan results; Bluetooth must live in the service; stale links.
 - Report: `docs/spikes/spike-a-emulator-bluetooth.md`. Code: `spikes/ble-netsim/`.
 
-### 0.7 Spike B — owner's phone ⏳ waiting for the phone
+### 0.7 Spike B — owner's phone ✅ (overnight test pending)
+- Redmi Note 6 Pro, Android 9, MIUI 12, security patch 2020-11.
+- Results: can advertise, LE 2M, MTU 517, filtered scanning works; no extended advertising.
+- Findings: unknown devices connect on their own; Android 9 needs Location on for scans; unpatched image decoders.
+- Report: `docs/spikes/spike-b-owner-phone.md`. The overnight background test is still to do.
 
 ---
 
@@ -228,3 +232,52 @@ Gate decisions: D75–D78 (outbox, compact seen cache, replay IDs kept, pending 
 ### Build & quality
 - JVM tests: model 15 · crypto 37 · mesh 38 (90 total). All green; ktlint, detekt, Lint pass.
 - Dependency checksums: **519 components**, recorded from a clean cache. Strict offline build passes (the CI lesson from Phase 2 applied).
+
+---
+
+## Phase 4 — App UI (2026-10-09)
+
+Gate decisions: D82 "Not confirmed yet — retry?", D84 home screen, D85 raven icon, D86 UI libraries (no DI framework), D87 reactions, D88 photos from gallery or in-app camera, D89 permission timing, D90 owner's Android 9 phone used for testing. During the phase: D91 Espresso 3.7.0 for tests, D92 MIUI test permission, D93 lime colours (supersedes D83).
+
+### 4.1 Navigation and theme ✅
+- One activity, Navigation Compose: chats → chat → contact; show QR; scan; profile.
+- Material 3 in Huginn's lime on every phone (D93), light and dark. All 48 colour roles come from `res/values` and `res/values-night`, shared with a new window theme (the cursor of the message field, the launch background, status bar icons).
+- Raven launcher icon (adaptive, plus a monochrome version) and a notification icon (D85).
+
+### 4.2 Onboarding ✅
+- Welcome → nickname and optional avatar (gallery or in-app camera; 192 px, ≤ 20 KB) → permission explainers (Bluetooth for the Android version, notifications on 13+) → battery-settings guide. The identity and device ID are created at the end.
+
+### 4.3 Contacts ✅
+- Chat list with last message, ticks and unread count; a "nearby" chip (0 until Phase 5).
+- Contact screen: block/unblock, delete (wipes key, chat and photos after a confirmation), pair again.
+
+### 4.4 Pairing ✅
+- Show my QR (with a 5-minute countdown) and scan theirs (CameraX + ZXing; the camera permission is asked at the first scan).
+- Both phones show the same 6-digit code; Accept/Reject ignore taps while another app draws over the screen (tapjacking, H5). Outcomes: connected, declined, two phones scanning at once, expired, invalid code.
+
+### 4.5 Chat ✅
+- Text up to 2,000 characters, typed in a classic text box with the keyboard's learning turned off (incognito, H4).
+- Ticks ⏳ ✓ ✓✓ 👁, and "Not confirmed yet — retry?" after 3 days (D82).
+- Reactions: 😂 😭 👍 🔥 ❤️ plus the full emoji picker (D87).
+- Photos from the gallery or the in-app camera (never saved to the gallery, D88): metadata stripped, re-encoded as WebP ≤ 50 KB and ≤ 1024 px; files that claim to be huge are rejected before decoding.
+
+### 4.6–4.8 Profile, notifications, nearby ✅
+- Profile editing; the new name and avatar go to every contact.
+- Notifications show only the sender's name ("New message"), never the text, and only when that chat isn't open.
+- The engine runs on its own thread in the app (`MeshRuntime`); the radio is a placeholder with no links until Phase 5.
+
+### Tests ✅
+- **Android 17 emulator:** app 6/6 (3 UI flows: onboarding; pairing by showing my QR, then chat with ticks, read state and a reaction; pairing by scanning theirs) and photo processing 3/3; data 12/12.
+- **Owner's Redmi, Android 9:** app 6/6, data 12/12.
+- The scripted friend in the UI tests runs a real mesh engine on the test-only fake network; the app itself has no simulated friends.
+- 🐞 Found by the slower phone and fixed: the chat list, the chat, the contact screen and the profile re-created their database queries on every redraw. That caused an endless query → redraw loop while the screen was open (wasted CPU and battery). The queries are now created once per screen.
+- Test fixes: wait for each screen to open before acting; allow up to 60 s for the very first start (encrypted database opened cold).
+- Test setup notes: Compose's test kit brings Espresso 3.5.0, which crashes on Android 17 → Espresso 3.7.0 (D91). MIUI blocks test screens unless "Display pop-up windows while running in the background" is on for the debug build; it is switched on via adb for a phone run and back off afterwards (D92).
+
+### Build & quality
+- JVM tests: model 15 · crypto 37 · mesh 38 (90 total). ktlint (now also on test sources), detekt and Lint pass.
+- Dependency checksums: **637 components** (+118: Navigation, Lifecycle, CameraX, ZXing, emoji picker, coroutines, Compose test kit, Espresso 3.7.0), recorded from an empty cache. Strict build passes.
+
+### Still open in Phase 4
+- 👤 Your hands-on check on your phone: onboarding, your QR, profile, contacts (the build plan's "Done when"). Chatting by hand moves to Phase 5.
+- Observation for Phase 6 (performance): the first start after install shows a spinner for about 2–5 s on the emulator while the encrypted database opens.
