@@ -73,7 +73,7 @@ class UiFlowTest {
                     "ui-$tag.db",
                 )
             },
-            transportFactory = { scheduler ->
+            transportFactory = { scheduler, _ ->
                 val network = SimNetwork(scheduler, seed = 1)
                 val app = network.addNode()
                 peerRadio = network.addNode()

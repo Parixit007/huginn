@@ -19,6 +19,8 @@ data class MeshConfig(
     val carryRetentionMillis: Long = 3 * DAY,
     /** Storage for carried packets; oldest dropped first (D69). */
     val carryMaxBytes: Long = 100L * 1024 * 1024,
+    /** A new link must say hello (a valid LINK packet) within this, or it is closed (D98, Spike B). */
+    val helloTimeoutMillis: Long = 10 * SECOND,
     /** Packets accepted per neighbour per second (D72, hardening H9). */
     val packetsPerSecondPerLink: Int = 100,
     /** Photos being reassembled at once (D72). */

@@ -6,6 +6,7 @@ import app.raven.core.mesh.packet.OuterPacket
 import app.raven.core.model.DeviceId
 import app.raven.core.model.PacketId
 import app.raven.core.model.RandomBytes
+import app.raven.core.transport.Cancellable
 import app.raven.core.transport.LinkId
 import app.raven.core.transport.Scheduler
 import app.raven.core.transport.Transport
@@ -26,6 +27,12 @@ class RouterStats {
     var relayed = 0L
     var carried = 0L
     var handedOver = 0L
+
+    /** Links closed because they never said hello within the timeout (D98). */
+    var silentLinksClosed = 0L
+
+    /** Second links to a neighbour we already had (PROTOCOL.md §8.2). */
+    var duplicateLinksClosed = 0L
 }
 
 /**
@@ -49,11 +56,21 @@ internal class Router(
     private val limiters = mutableMapOf<LinkId, RateLimiter>()
     private val neighbours = mutableMapOf<LinkId, DeviceId>()
     private val offered = mutableMapOf<LinkId, MutableSet<PacketId>>()
+    private val helloTimers = mutableMapOf<LinkId, Cancellable>()
 
     val linkCount: Int get() = transport.links.size
 
     fun onLinkUp(link: LinkId) {
         limiters[link] = RateLimiter(config.packetsPerSecondPerLink, scheduler.now())
+        // A connection that never says hello only wastes one of the few Bluetooth slots (Spike B): close it.
+        helloTimers[link] =
+            scheduler.schedule(config.helloTimeoutMillis) {
+                helloTimers.remove(link)
+                if (link in limiters && link !in neighbours) {
+                    stats.silentLinksClosed++
+                    transport.disconnect(link)
+                }
+            }
         offerCarried(link)
     }
 
@@ -61,6 +78,7 @@ internal class Router(
         limiters.remove(link)
         neighbours.remove(link)
         offered.remove(link)
+        helloTimers.remove(link)?.cancel()
     }
 
     fun onReceive(
@@ -133,8 +151,18 @@ internal class Router(
         link: LinkId,
         packet: OuterPacket,
     ) {
-        neighbours[link] = packet.sender
         val message = LinkMessage.decode(packet.body) ?: return
+        if (link !in neighbours) {
+            // The hello: from now on this link belongs to packet.sender.
+            if (neighbours.containsValue(packet.sender)) {
+                // We already have a link to this phone; keep the older one (PROTOCOL.md §8.2).
+                stats.duplicateLinksClosed++
+                transport.disconnect(link)
+                return
+            }
+            neighbours[link] = packet.sender
+            helloTimers.remove(link)?.cancel()
+        }
         when (message.type) {
             LinkMessage.Type.OFFER -> {
                 val wanted = message.packetIds.filterNot { seen.contains(it, scheduler.now()) }

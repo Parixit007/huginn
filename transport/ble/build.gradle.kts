@@ -15,3 +15,7 @@ android {
         targetCompatibility = JavaVersion.VERSION_17
     }
 }
+
+dependencies {
+    api(project(":core:transport"))
+}

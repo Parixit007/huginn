@@ -40,13 +40,17 @@ class SimNetwork(
         b: SimTransport,
     ): Boolean = a.linkTo(b) != null
 
-    /** Opens a link between two phones; both sides get onLinkUp. Does nothing if already connected. */
+    /**
+     * Opens a link between two phones; both sides get onLinkUp. Does nothing if already connected, unless
+     * [allowSecond] asks for a duplicate link (real Bluetooth can produce one, PROTOCOL.md §8.2).
+     */
     fun connect(
         a: SimTransport,
         b: SimTransport,
+        allowSecond: Boolean = false,
     ) {
         require(a !== b) { "a phone can't link to itself" }
-        if (isConnected(a, b)) return
+        if (isConnected(a, b) && !allowSecond) return
         val aSide = LinkId(nextLinkId++)
         val bSide = LinkId(nextLinkId++)
         a.attach(aSide, b, bSide)
@@ -68,6 +72,20 @@ class SimNetwork(
         scheduler.schedule(0) {
             a.notifyDown(aSide)
             b.notifyDown(bSide)
+        }
+    }
+
+    /** Closes one specific link, as either side's [Transport.disconnect] would. */
+    internal fun closeLink(
+        node: SimTransport,
+        link: LinkId,
+    ) {
+        val remote = node.peerOf(link) ?: return
+        node.detach(link)
+        remote.first.detach(remote.second)
+        scheduler.schedule(0) {
+            node.notifyDown(link)
+            remote.first.notifyDown(remote.second)
         }
     }
 
@@ -164,6 +182,10 @@ class SimTransport internal constructor(
         network.transmit(peer.node, peer.remoteLink, packet)
         return true
     }
+
+    override fun disconnect(link: LinkId) = network.closeLink(this, link)
+
+    internal fun peerOf(link: LinkId): Pair<SimTransport, LinkId>? = peers[link]?.let { it.node to it.remoteLink }
 
     internal fun linkTo(other: SimTransport): LinkId? = peers.entries.firstOrNull { it.value.node === other }?.key
 

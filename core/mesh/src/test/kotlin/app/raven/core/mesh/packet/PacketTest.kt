@@ -7,6 +7,7 @@ import app.raven.core.model.ImageId
 import app.raven.core.model.MessageId
 import app.raven.core.model.Nickname
 import app.raven.core.model.PacketId
+import app.raven.core.transport.link.LinkConfig
 import org.junit.jupiter.api.Assertions.assertArrayEquals
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
@@ -177,5 +178,11 @@ class DataPacketsTest {
         val first = DataPackets.seal(aliceCipher, PacketId.random(), alice, bob, message).encode()
         val retry = DataPackets.seal(aliceCipher, PacketId.random(), alice, bob, message).encode()
         assertFalse(first.copyOfRange(3, first.size).contentEquals(retry.copyOfRange(3, retry.size)))
+    }
+
+    @Test
+    fun `the Bluetooth size limit is exactly the largest outer packet`() {
+        // PROTOCOL.md §8.4: a neighbour announcing more than this is closed, so it must match §2 + §3.
+        assertEquals(OuterPacket.MAX_SIZE, LinkConfig().maxPacketSize)
     }
 }

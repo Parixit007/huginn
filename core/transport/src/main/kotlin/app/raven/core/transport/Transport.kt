@@ -27,6 +27,12 @@ interface Transport {
         link: LinkId,
         packet: ByteArray,
     ): Boolean
+
+    /**
+     * Closes one link: a neighbour that never said hello, or a second link to a neighbour we already have
+     * (PROTOCOL.md §8.3, §8.2). The listener gets onLinkDown as usual. Does nothing if the link is gone.
+     */
+    fun disconnect(link: LinkId)
 }
 
 interface TransportListener {

@@ -58,7 +58,34 @@ class Notifier(
         manager.notify(from.hashCode(), notification)
     }
 
-    private companion object {
-        const val CHANNEL = "messages"
+    companion object {
+        private const val CHANNEL = "messages"
+        private const val BACKGROUND_CHANNEL = "background"
+
+        /** The background service's permanent notification (D97): low priority, no sound. */
+        fun background(context: Context): Notification {
+            val manager = context.getSystemService(NotificationManager::class.java)
+            manager.createNotificationChannel(
+                NotificationChannel(BACKGROUND_CHANNEL, "Running in the background", NotificationManager.IMPORTANCE_LOW)
+                    .apply { description = "Shown while Raven passes messages nearby" },
+            )
+            val open =
+                PendingIntent.getActivity(
+                    context,
+                    0,
+                    Intent(context, MainActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP),
+                    PendingIntent.FLAG_IMMUTABLE,
+                )
+            return Notification
+                .Builder(context, BACKGROUND_CHANNEL)
+                .setSmallIcon(R.drawable.ic_notification)
+                .setColor(context.getColor(R.color.theme_primary))
+                .setContentTitle("Raven is on")
+                .setContentText("Passing messages nearby")
+                .setContentIntent(open)
+                .setOngoing(true)
+                .setCategory(Notification.CATEGORY_SERVICE)
+                .build()
+        }
     }
 }

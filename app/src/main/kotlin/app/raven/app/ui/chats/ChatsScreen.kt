@@ -62,20 +62,31 @@ fun ChatsScreen(
     }.collectAsStateWithLifecycle(emptyList())
     val nearby by runtime.nearby.collectAsStateWithLifecycle()
     var addSheet by remember { mutableStateOf(false) }
+    val radio by runtime.radioState.collectAsStateWithLifecycle()
     Scaffold(
-        topBar = { ChatsTopBar(nearby, openProfile) },
+        topBar = {
+            ChatsTopBar(
+                nearby = nearby,
+                paused = radio.paused,
+                togglePause = { if (radio.paused) runtime.radio.resume() else runtime.radio.pause() },
+                openProfile = openProfile,
+            )
+        },
         floatingActionButton = {
             FloatingActionButton(onClick = { addSheet = true }, modifier = Modifier.testTag("add")) {
                 Icon(painterResource(R.drawable.ic_add), contentDescription = "Add contact")
             }
         },
     ) { padding ->
-        if (chats.isEmpty()) {
-            EmptyChats(Modifier.padding(padding))
-        } else {
-            LazyColumn(Modifier.padding(padding)) {
-                items(chats, key = { it.peerId.contentHashCode() }) { chat ->
-                    ChatRow(chat) { openChat(DeviceId(chat.peerId)) }
+        Column(Modifier.padding(padding)) {
+            RadioBanner(runtime)
+            if (chats.isEmpty()) {
+                EmptyChats(Modifier)
+            } else {
+                LazyColumn {
+                    items(chats, key = { it.peerId.contentHashCode() }) { chat ->
+                        ChatRow(chat) { openChat(DeviceId(chat.peerId)) }
+                    }
                 }
             }
         }
@@ -99,6 +110,8 @@ fun ChatsScreen(
 @Composable
 private fun ChatsTopBar(
     nearby: Int,
+    paused: Boolean,
+    togglePause: () -> Unit,
     openProfile: () -> Unit,
 ) {
     var menu by remember { mutableStateOf(false) }
@@ -118,6 +131,14 @@ private fun ChatsTopBar(
                         menu = false
                         openProfile()
                     })
+                    DropdownMenuItem(
+                        text = { Text(if (paused) "Resume Raven" else "Pause Raven") },
+                        onClick = {
+                            menu = false
+                            togglePause()
+                        },
+                        modifier = Modifier.testTag("pause"),
+                    )
                 }
             }
         },

@@ -288,3 +288,29 @@ Gate decisions: D82 "Not confirmed yet — retry?", D84 home screen, D85 raven i
 - Clean strict build, 90 JVM tests and the 18 device tests on the Android 17 emulator all pass.
 - Clean install of `app.raven.mesh` on the owner's phone (the old `app.huginn.mesh` was removed) and on the virtual phone.
 - GitHub repo renamed `huginn` → `raven` with `gh`, after the owner's OK; the old URL redirects. The local remote points to the new URL.
+
+---
+
+## Phase 5 — Bluetooth + background service (started 2026-10-09)
+
+Gate decisions: D95 Swift helper for the Mac peer (settles P8), D96 "Pause Raven", D97 background notification, D98 connection manager starting values, D99 Bluetooth link layer (`docs/PROTOCOL.md` §8 approved), D100 Mac peer behaviour.
+
+### 5.1–5.3 Bluetooth transport ✅ (`:transport:ble`, shared parts in `:core:transport`)
+- Shared, JVM-tested link layer (`core/transport/.../link/`): fragmentation and reassembly (§8.4), the link token and "lower token dials" (§8.2), the scan budget (5 starts per 30 s), the connection planner (D98: 4 links, back-off, rotation), and the per-link pipe (64-packet queue, one write in flight).
+- `BleTransport`: GATT server (IN/OUT, subscription = link up, unsubscribed connections closed after 10 s), dialer (MTU 517, LE 2M when supported, subscribe), legacy advertising with the token in the scan response (rotated every 15 min), duty-cycled filtered scanning, Bluetooth on/off handling, old and new Android Bluetooth APIs (the owner's phone is Android 9).
+- Engine: `Transport.disconnect`; a link that sends no valid hello within 10 s is closed (Spike B finding); a second link to the same phone is closed.
+
+### 5.4–5.5 Background service, permissions ✅
+- `MeshService` (foreground service, type `connectedDevice`) with "Raven is on · Passing messages nearby" (D97); the radio runs exactly while it does. Starts after reboot and after an app update (D50).
+- "Pause Raven" in the chat list menu (D96), remembered across reboots.
+- Chat list banner with a fixing button: paused, missing permission (Nearby devices / Location), Bluetooth off, Location off (Android 8–11), phone can't advertise.
+- Manifest: `FOREGROUND_SERVICE`, `FOREGROUND_SERVICE_CONNECTED_DEVICE`, `RECEIVE_BOOT_COMPLETED`; service and receiver not exported.
+
+### 5.6 Mac test peer ✅ built, ⏳ waiting for the phone (`tools/mac-peer/`, how-to in its README)
+- Swift helper on CoreBluetooth (dials only) + Raven's real engine on the Mac, Terminal commands, QR code drawn in the terminal, photos re-encoded to ≤ 50 KB, nothing kept after quitting.
+
+### 5.7 Tests (so far)
+- JVM: 116 tests, 0 failures (link layer 18, engine link rules 4 new, Mac peer 4).
+- **Two emulators over the emulator's virtual Bluetooth, real `BleTransport`:** paired (same 6-digit code on both), text both ways, delivered ticks: ✅ 2 of 2 runs (`tools/two-phone-test.sh`). One connection, MTU 517, LE 2M.
+- Device tests on the Android 17 emulator: app 6/6, data 12/12. The two-phone test is left out of normal runs (`@NeedsTwoPhones`).
+- ⏳ Still to do: phone ↔ Mac over real Bluetooth (needs the owner), 24-hour soak with a battery measurement on the owner's phone (also Spike B's overnight MIUI check).

@@ -18,8 +18,28 @@ import app.raven.core.transport.Transport
 import app.raven.data.Storage
 import app.raven.data.db.MessageEntity
 import app.raven.data.db.MessageStatus
+import app.raven.transport.ble.BleStatus
+import app.raven.transport.ble.BleTransport
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+
+/** The radio as the chat list shows it (build plan 5.5, D96). */
+data class RadioState(
+    val paused: Boolean = false,
+    val on: Boolean = false,
+    /** Null until the Bluetooth layer has reported (and always in tests on the fake network). */
+    val ble: BleStatus? = null,
+)
+
+/** What the runtime needs from Android to keep the radio running in the background (D50, D96, D97). */
+interface RadioHost {
+    var paused: Boolean
+
+    /** Starts the background service if Raven should run (permissions granted, not paused). */
+    fun startService()
+
+    fun stopService()
+}
 
 sealed interface RuntimeState {
     data object Loading : RuntimeState
@@ -38,8 +58,11 @@ sealed interface RuntimeState {
  */
 class MeshRuntime(
     private val openStorage: () -> Storage,
-    private val transportFactory: (Scheduler) -> Transport,
+    /** Builds the transport on the mesh thread; `post` runs work there (Bluetooth callbacks hop through it). */
+    private val transportFactory: (Scheduler, (() -> Unit) -> Unit) -> Transport,
     private val notifier: Notifier?,
+    /** Null in tests: the radio is simply on, with no background service. */
+    private val host: RadioHost? = null,
     private val config: MeshConfig = MeshConfig(),
 ) : MeshListener {
     private val thread = HandlerThread("mesh").apply { start() }
@@ -54,10 +77,16 @@ class MeshRuntime(
     /** Raven phones directly connected right now (spec §3). */
     val nearby: StateFlow<Int> = mutableNearby
 
+    private val mutableRadio = MutableStateFlow(RadioState(paused = host?.paused ?: false, on = host == null))
+
+    /** Paused, on, and what Bluetooth can do right now (for the banners). */
+    val radioState: StateFlow<RadioState> = mutableRadio
+
     lateinit var storage: Storage
         private set
     private var node: MeshNode? = null
     private lateinit var transport: Transport
+    private lateinit var radioSwitch: RadioSwitch
 
     private val pairingController =
         PairingController(
@@ -73,7 +102,8 @@ class MeshRuntime(
     fun start() =
         post {
             storage = openStorage()
-            transport = CountingTransport(transportFactory(scheduler)) { mutableNearby.value = it }
+            radioSwitch = RadioSwitch(transportFactory(scheduler, ::post), on = host == null)
+            transport = CountingTransport(radioSwitch) { mutableNearby.value = it }
             val identity = storage.identity()
             if (identity == null) {
                 mutableState.value = RuntimeState.NeedsOnboarding
@@ -96,7 +126,11 @@ class MeshRuntime(
         storage.createIdentity(nickname)
         if (avatar != null) storage.setOwnAvatar(avatar)
         startNode(DeviceId(checkNotNull(storage.identity()).deviceId))
+        if (host?.paused == false) host.startService()
     }
+
+    /** The radio: on/off, pause, foreground (D96, D98). */
+    val radio = Radio()
 
     /** Chat actions (all run on the mesh thread). */
     val chat = ChatActions()
@@ -106,6 +140,50 @@ class MeshRuntime(
 
     /** Pairing screens: [Pairing.state] to show, actions to call. */
     val pairing = Pairing()
+
+    inner class Radio {
+        /** Called by the background service: the radio runs exactly while the service does. */
+        fun setOn(on: Boolean) =
+            post {
+                radioSwitch.setOn(on)
+                mutableRadio.value = mutableRadio.value.copy(on = on)
+            }
+
+        /** The app is on screen: scan continuously; otherwise duty-cycle (D98). */
+        fun setForeground(visible: Boolean) = post { ble()?.setForeground(visible) }
+
+        /**
+         * Re-checks Bluetooth, permissions and Location (the user may have changed them) and starts the
+         * background service if Raven should be running.
+         */
+        fun refresh() =
+            post {
+                ble()?.retry()
+                val host = host ?: return@post
+                if (state.value is RuntimeState.Ready && !host.paused) host.startService()
+            }
+
+        /** "Pause Raven" (D96): stops the service and with it the radio, also across reboots. */
+        fun pause() {
+            val host = host ?: return
+            host.paused = true
+            host.stopService()
+            mutableRadio.value = mutableRadio.value.copy(paused = true)
+        }
+
+        fun resume() {
+            host?.paused = false
+            mutableRadio.value = mutableRadio.value.copy(paused = false)
+            refresh()
+        }
+
+        /** From the Bluetooth layer, on the mesh thread. */
+        fun onStatus(status: BleStatus) {
+            mutableRadio.value = mutableRadio.value.copy(ble = status)
+        }
+
+        private fun ble(): BleTransport? = radioSwitch.inner as? BleTransport
+    }
 
     inner class ChatActions {
         fun sendText(

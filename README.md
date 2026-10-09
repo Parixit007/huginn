@@ -111,6 +111,12 @@ An offline-first, end-to-end encrypted Android messenger (in the spirit of bitch
 | D92 | UI tests on the owner's MIUI phone | MIUI blocks test screens by default; before a phone run, the "Display pop-up windows while running in the background" permission is switched on for the Raven debug build only, via adb, and switched back off after the run | ✅ |
 | D93 | Colours | Lime accent on every phone, like WhatsApp's green (owner decision 2026-10-09; supersedes D83). All Material 3 roles built from the icon's lime #C3E24F; follows light/dark. Plain top bar; lime + button, send button, avatars, unread badges and main buttons, all with dark text; my bubbles pale lime (deep olive in dark mode); small text accents deep lime-olive #516601 in light mode, since lime text on white is unreadable (1.4:1) | ✅ |
 | D94 | Name: **Raven** | Renamed everywhere (owner decision 2026-10-09; supersedes D32/D33): launcher label and on-screen text, package ID `app.raven.mesh`, code packages `app.raven.*`, docs. Still a working name until a trademark check (open item). Protocol identifiers unchanged (D47). GitHub repo renamed `huginn` → `raven` | ✅ (working) |
+| D95 | Mac test peer radio | A small **Swift** helper using Apple's built-in CoreBluetooth (no third-party packages) drives the Mac's radio; our real Kotlin engine runs beside it on the Mac. Dev-only, never shipped. Amends P4 ("Python radio") and settles P8 (owner decision 2026-10-09) | ✅ |
+| D96 | On/off switch | **"Pause Raven"** in the menu: stops Bluetooth and the background service until turned back on, also across reboots. While paused nothing is sent, received or relayed, and the chat list says so | ✅ |
+| D97 | Background notification | Title **"Raven is on"**, text "Passing messages nearby"; low priority (no sound) | ✅ |
+| D98 | Connection manager starting values | Up to **4 links**; drop a connection that sends no valid hello within **10 s**; rotate one link every **10 min** if others are waiting; background scanning **10 s every 60 s**, continuous while the app is open; at most 5 scan starts per 30 s. Tunable from real tests (open question 4) | ✅ |
+| D99 | Bluetooth link layer | `docs/PROTOCOL.md` §8 approved: GATT layout, a random **link token** (rotated every 15 min) decides who dials instead of the device ID, which is never broadcast; 1-byte fragment header + 2-byte length; packets over 8,259 B close the link; 64-packet queue per link; `Transport.disconnect` for the 10 s hello rule | ✅ |
+| D100 | Mac test peer behaviour | Runs in Terminal; shows its QR code there for the phone to scan; chat by typing. **Forgets everything on quit** (nothing stored on the Mac; pair again each session). It only dials and never advertises, because macOS can't put the link token in an advert (PROTOCOL.md §8.2) | ✅ |
 
 ## 3. Features (v1)
 
@@ -157,7 +163,7 @@ An offline-first, end-to-end encrypted Android messenger (in the spirit of bitch
   - Per-hop fragmentation lives inside the transport; relays never see it.
 - **Connection manager**:
   - A maximum number of links (around 4–5, tuned in testing).
-  - When two phones see each other, the one with the lower device ID connects, so the pair never connects twice.
+  - When two phones see each other, the one with the lower random link token connects, so the pair doesn't connect twice; the device ID is never broadcast (D99).
   - Links are rotated periodically so new neighbours get a turn.
   - The app warns if the phone can't advertise.
 - **Routing v1 (D45)**: plain flooding.

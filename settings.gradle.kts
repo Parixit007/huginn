@@ -37,4 +37,5 @@ include(
     ":transport:ble",
     ":transport:fake",
     ":data",
+    ":tools:mac-peer",
 )

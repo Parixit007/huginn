@@ -1,6 +1,6 @@
 # Wire protocol v1
 
-> Exact bytes for spec v0.3 (`README.md` §4–§6). Status: **approved by owner on 2026-10-08** (D57–D60).
+> Exact bytes for spec v0.3 (`README.md` §4–§6). Status: **approved by owner on 2026-10-08** (D57–D60); §8 Bluetooth link layer approved 2026-10-09 (D99).
 > All identifiers are brand-neutral (D47): the protocol is called **MSH1** in labels and the QR prefix.
 > All integers are big-endian. "‖" means concatenation.
 
@@ -112,3 +112,62 @@ link_type (1) ‖ count (1) ‖ packet_ids (8 each, at most 63)
 - Every length is checked against the remaining bytes before reading. Unknown `version`, `kind` or `type` → drop.
 - Nicknames: at most **32 characters** (Unicode code points, so ≤ 128 bytes of UTF-8), not empty, with control, invisible and direction-flipping characters removed (H6).
 - Decoders never throw on bad input from strangers. They return "invalid", and fuzz tests enforce this (Phase 1.7).
+
+## 8. Bluetooth LE link layer (Phase 5) — approved by owner on 2026-10-09 (D99)
+
+How packets travel over one Bluetooth hop. Relays and the mesh engine never see any of this (spec §6).
+
+### 8.1 GATT layout
+
+| What | UUID | Properties |
+|---|---|---|
+| Service | `21f4aec6-c5b9-4784-86b5-d37334400940` | Primary |
+| IN (the dialing phone writes here) | `3084ce15-1725-4635-b7bb-d9e9807a29ff` | Write, write without response |
+| OUT (the advertising phone notifies here) | `0ff2fcb6-7980-41db-845a-4f495c69ba63` | Notify (standard CCCD `0x2902`) |
+
+- Random, brand-neutral UUIDs (D47). Two characteristics, as proven in Spike A.
+- Every phone runs the GATT server *and* scans/dials (spec §6). On a given link, one side is the **dialer** (GATT client) and the other the **advertiser** (GATT server).
+
+### 8.2 Advertising and who dials
+
+- Legacy advertising only (31 bytes; the owner's phone has no extended advertising, Spike B):
+  - advert: flags + the 128-bit service UUID (21 B);
+  - scan response: service data for the same UUID = an 8-byte random **link token** (26 B).
+  - No device name, no TX power, never the device ID.
+- The link token is random and is replaced, together with a restart of advertising (which also changes the phone's Bluetooth address), every **15 minutes**. A passive listener can't follow a phone for longer than that.
+- **Who dials:** when two phones see each other, the one with the **lower link token** dials. This replaces "the lower device ID connects" (spec §6): device IDs aren't known before connecting, and broadcasting them would make phones trackable.
+- An advert without a token (the Mac test peer; macOS can't send service data) may always be dialed.
+- Safety net: if two links still end up with the same neighbour (same device ID in the hello), the newer one is closed. Spike A saw duplicate scan results and lingering old connections.
+
+### 8.3 Bringing a link up
+
+1. The dialer connects (LE transport), asks for MTU 517 and, if supported, the LE 2M PHY (Spike B: the owner's phone supports it).
+2. Fragment size = `min(MTU − 3, 512)` (ATT limit, Spike A); if the MTU request fails, 20 bytes.
+3. The dialer subscribes to OUT. The link is **up** on both sides once that subscription is written: `onLinkUp`.
+4. The mesh engine immediately sends the empty LINK OFFER (the hello, §6). If no valid LINK packet arrives within **10 s** (D98), the engine closes the link. This needs one addition to the `Transport` interface: `disconnect(link)`.
+
+### 8.4 Fragmentation (per hop, inside the transport)
+
+Each GATT write (dialer → advertiser) or notification (advertiser → dialer) carries one fragment:
+```
+flags (1) ‖ [total_length (2), first fragment only] ‖ data
+```
+- `flags` bit 7 = FIRST; bits 0–6 must be 0.
+- `total_length` = 1 … 8,259 bytes (the largest outer packet, §2 + §3). A larger value means a broken or hostile neighbour, so the link is closed.
+- Fragments of one packet follow each other in order; Bluetooth delivers them reliably and in order on one link.
+- A new FIRST before the current packet is complete → the unfinished one is thrown away. Extra bytes past `total_length` → the fragment is invalid and the unfinished packet is thrown away.
+- A complete packet goes to the engine (`onReceive`), which applies its own strict parsing (§7).
+
+### 8.5 Flow control and limits
+
+- One write in flight per link: the next one waits for the previous write's callback (Spike A). One notification in flight per neighbour: waits for "notification sent".
+- Outgoing queue: at most **64 packets** per link. When full, new packets for that link are dropped; the engine's retries and OFFER/WANT recover them.
+- The engine's existing receive limits apply on top (100 packets/s per link; spec §6, abuse limits).
+
+### 8.6 Connection manager (D98 values)
+
+- At most **4 links** (dialed + accepted). When full: stop advertising and stop dialing, keep the duty-cycled scan so waiting neighbours are noticed.
+- **Rotation:** every 10 minutes, if a Raven phone was seen that we aren't linked to and all slots are full, the link that has been up longest is closed (it has had its OFFER/WANT exchange).
+- **Scanning:** only with the service-UUID filter. Continuous while the app is on screen; otherwise 10 s every 60 s. At most 5 scan starts per 30 s (Android silently ignores more).
+- Duplicate scan results for a phone that's already linked or being dialed are ignored (Spike A).
+- "Pause Raven" (D96) stops advertising, scanning and the GATT server and closes every link.

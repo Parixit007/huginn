@@ -25,20 +25,46 @@ class HandlerScheduler(
 }
 
 /**
- * Stand-in until the Bluetooth transport exists (build plan Phase 5): no neighbours ever, so messages simply
- * stay pending. It never touches the radio.
+ * Turns the radio on and off underneath the engine (D96 "Pause Raven", and the background service's
+ * lifetime): while off there are no links, so messages simply wait as pending. The engine never notices
+ * beyond links going down and coming back.
  */
-class NoRadioTransport : Transport {
-    override fun start(listener: TransportListener) = Unit
+class RadioSwitch(
+    val inner: Transport,
+    private var on: Boolean,
+) : Transport {
+    private var listener: TransportListener? = null
+    private var started = false
 
-    override fun stop() = Unit
+    override val links: Set<LinkId> get() = if (on && started) inner.links else emptySet()
 
-    override val links: Set<LinkId> = emptySet()
+    override fun start(listener: TransportListener) {
+        this.listener = listener
+        started = true
+        if (on) inner.start(listener)
+    }
+
+    override fun stop() {
+        if (on && started) inner.stop()
+        started = false
+    }
 
     override fun send(
         link: LinkId,
         packet: ByteArray,
-    ): Boolean = false
+    ): Boolean = on && started && inner.send(link, packet)
+
+    override fun disconnect(link: LinkId) {
+        if (on && started) inner.disconnect(link)
+    }
+
+    fun setOn(value: Boolean) {
+        if (value == on) return
+        on = value
+        val current = listener
+        if (!started || current == null) return
+        if (value) inner.start(current) else inner.stop()
+    }
 }
 
 /** Wraps a transport to report how many neighbours are connected (the nearby count, spec §3). */

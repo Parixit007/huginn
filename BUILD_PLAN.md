@@ -140,7 +140,7 @@ Modules: `:transport:ble`, plus the service in `:app`.
 | 5.3 | Link layer: MTU negotiation (up to 517) with a 20-byte fallback, per-hop fragmentation, flow control. |
 | 5.4 | Foreground service (`connectedDevice`), start after boot (after first unlock), behaviour under Doze and OEM battery savers. |
 | 5.5 | Permission flows: Android 8–11 Location · 12+ Nearby devices · 13+ notifications · 14+ service type. |
-| 5.6 | **Mac test peer** (dev-only, never shipped): a small Python tool handles only the Mac's Bluetooth radio and passes raw bytes to our real Kotlin core (Phases 1–2) running on the Mac. One implementation, nothing to keep in sync. Lives in `tools/mac-peer/`. 🟡 Python Bluetooth libraries (P8). 👤 macOS will ask you to allow Bluetooth access. |
+| 5.6 | **Mac test peer** (dev-only, never shipped): a small Swift helper (Apple's CoreBluetooth, no third-party packages, D95) handles only the Mac's Bluetooth radio and passes raw bytes to our real Kotlin core (Phases 1–2) running on the Mac. One implementation, nothing to keep in sync. Lives in `tools/mac-peer/`. 👤 macOS will ask you to allow Bluetooth access. |
 | 5.7 | Testing with 1 phone: unit tests with a mocked BLE layer · emulators via netsim (if Spike A works) · phone ↔ Mac peer over real Bluetooth · a 24-hour soak test with a battery measurement. |
 
 **Done when:** you pair your phone with the Mac peer and chat (text, reactions, an image, receipts) over real Bluetooth · the service survives 24 h · you get a battery report.
@@ -185,9 +185,9 @@ Modules: `:transport:ble`, plus the service in `:app`.
 | P1 | Phase 0 | **Public** GitHub repo named `huginn` (renamed `raven` on 2026-10-09, D94), created by me with `gh` after you approve the exact command | ✅ |
 | P2 | Phase 0 | CI on every push (GitHub Actions) | ✅ |
 | P3 | Phase 0 | Tooling: latest stable Kotlin/AGP/Gradle on Studio's JDK · JUnit 5 + coroutines-test · Jazzer · CameraX + ZXing · `PROGRESS.md` step log · Android Lint + ktlint + detekt | ✅ |
-| P4 | Phases 4–5 | Test aids: **Mac as a Bluetooth test peer** (Python radio + our Kotlin core). No simulated friends in debug builds. | ✅ |
+| P4 | Phases 4–5 | Test aids: **Mac as a Bluetooth test peer** (~~Python~~ Swift radio helper, D95, + our Kotlin core). No simulated friends in debug builds. | ✅ |
 | P5 | Phase 6 | Who creates and keeps the release signing key (recommended: you, with an offline backup) | later |
 | P6 | Phase 0 | **The owner makes all commits and pushes**; I only report when a step is ready | ✅ |
 | P7 | Phase 0 | Copyright holder name in the MIT `LICENSE` (your name, a handle, or "Raven contributors") | ⏳ |
-| P8 | Phase 5 | Python Bluetooth libraries for the Mac peer (proposal: `bleak` for scanning/connecting, `bless` for advertising) | later |
+| P8 | Phase 5 | ~~Python Bluetooth libraries for the Mac peer (`bleak` + `bless`)~~ → a Swift helper on Apple's CoreBluetooth, no third-party packages (D95) | ✅ |
 | P9 | Phase 0 | No AI-tool names or attribution anywhere in the repo; local-only working files excluded via `.git/info/exclude` | ✅ |

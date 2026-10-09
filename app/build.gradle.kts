@@ -18,6 +18,8 @@ android {
         versionCode = 1
         versionName = "0.0.1"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        // Two-phone Bluetooth tests run only through tools/two-phone-test.sh.
+        testInstrumentationRunnerArguments["notAnnotation"] = "app.raven.app.NeedsTwoPhones"
     }
 
     buildTypes {
@@ -46,6 +48,7 @@ android {
 dependencies {
     implementation(project(":data"))
     implementation(project(":core:mesh"))
+    implementation(project(":transport:ble"))
     implementation(platform(libs.compose.bom))
     implementation(libs.compose.material3)
     implementation(libs.androidx.activity.compose)
