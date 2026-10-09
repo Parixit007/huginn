@@ -1,4 +1,4 @@
-// Throwaway experiment (Phase 0, Spike A). Separate build: never part of the Huginn app.
+// Throwaway experiment (Phase 0, Spike A). Separate build: never part of the Raven app.
 pluginManagement {
     repositories {
         google()

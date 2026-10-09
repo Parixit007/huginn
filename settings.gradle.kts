@@ -26,7 +26,7 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "huginn"
+rootProject.name = "raven"
 
 include(
     ":app",

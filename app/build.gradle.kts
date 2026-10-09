@@ -7,12 +7,12 @@ plugins {
 }
 
 android {
-    namespace = "app.huginn.app"
+    namespace = "app.raven.app"
     compileSdk = 37
 
     defaultConfig {
         // Placeholder until the first public release (spec D33).
-        applicationId = "app.huginn.mesh"
+        applicationId = "app.raven.mesh"
         minSdk = 26
         targetSdk = 37
         versionCode = 1
@@ -69,7 +69,7 @@ dependencies {
 }
 
 /**
- * Huginn never talks to the internet (spec D4). This fails the build if the INTERNET permission
+ * Raven never talks to the internet (spec D4). This fails the build if the INTERNET permission
  * shows up in a release manifest, including when a library adds it through manifest merging.
  */
 abstract class VerifyNoForbiddenPermissions : DefaultTask() {
@@ -103,7 +103,7 @@ abstract class VerifyNoForbiddenPermissions : DefaultTask() {
             }
         val found = requested.filterNotNull().filter { it in forbidden }
         check(found.isEmpty()) {
-            "Forbidden permission(s) in the merged release manifest: $found. Huginn must never use the internet."
+            "Forbidden permission(s) in the merged release manifest: $found. Raven must never use the internet."
         }
         report.get().asFile.writeText("Requested permissions: ${requested.filterNotNull().sorted()}\n")
     }

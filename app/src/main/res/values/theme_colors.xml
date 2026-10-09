@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-    Huginn's colours (D93): every Material 3 role, built from the icon's lime (#C3E24F, hue 114.5).
+    Raven's colours (D93): every Material 3 role, built from the icon's lime (#C3E24F, hue 114.5).
     Light mode here, dark mode in values-night. Lime itself is too light for text on white, so in
     light mode it is a fill (buttons, badges, avatars) and text accents use a deep lime-olive.
 -->

@@ -1,4 +1,4 @@
-# Huginn — Spec Audit #1
+# Raven — Spec Audit #1
 
 - **Date:** 2026-10-07
 - **Audited:** `README.md` spec v0.1 (approved by owner, except the final name)
@@ -122,7 +122,7 @@ None of these forces a redesign. Every fix fits the current architecture.
 | H4 | "Incognito keyboard": stop keyboards like Gboard from learning or storing what you type in chats |
 | H5 | Tapjacking protection: ignore taps on Accept and pairing buttons when another app draws over the screen |
 | H6 | Clean up nicknames: strip invisible and direction-flipping characters, cap the length |
-| H7 | No `huginn:` web links: pairing only works through the in-app camera, so a website or message can't trigger it |
+| H7 | No `raven:` web links: pairing only works through the in-app camera, so a website or message can't trigger it |
 | H8 | Key separation: derive one key per direction (A→B and B→A) from the shared key using HKDF |
 | H9 | Per-neighbour rate limits, plus caps on memory used for unfinished images (prevents denial of service from strangers) |
 | H10 | Fuzz-test the packet parser, because it reads data from strangers |
@@ -132,8 +132,8 @@ None of these forces a redesign. Every fix fits the current architecture.
 ### S6 — Leaving a group doesn't remove access *(info only)*
 A person who leaves a group, or who is simply no longer trusted, keeps the group key. They can still read future group messages whenever they are within mesh range. This stays true until v2 adds "kick + new key". The v1 workaround is to create a new group and re-invite everyone. → Will be added to the threat model.
 
-### S7 — Anyone can tell a phone is running Huginn *(info only)*
-Bluetooth discovery needs a public service ID in the advertisement, so a scanner can detect "a Huginn user is here". Every BLE mesh app has this problem, bitchat included. It matters in places where using such an app is itself risky. → Will be added to the threat model.
+### S7 — Anyone can tell a phone is running Raven *(info only)*
+Bluetooth discovery needs a public service ID in the advertisement, so a scanner can detect "a Raven user is here". Every BLE mesh app has this problem, bitchat included. It matters in places where using such an app is itself risky. → Will be added to the threat model.
 
 ### S8 — Lock-screen notifications can show messages
 Notifications currently have no rules. Anyone glancing at your lock screen could read messages. → Q11.
@@ -152,7 +152,7 @@ In BLE, "broadcast to everyone" really means "send to each connected phone, one 
 - rotates links so new neighbours get a turn.
 
 ### F2 — "Bluetooth Mesh" naming *(info)*
-We are **not** using the official Bluetooth SIG "Bluetooth Mesh" standard. That standard was built for IoT devices like light bulbs and sensors, has tiny payloads, and Android apps can't use it. Huginn is a custom mesh over BLE connections, the same approach bitchat takes.
+We are **not** using the official Bluetooth SIG "Bluetooth Mesh" standard. That standard was built for IoT devices like light bulbs and sensors, has tiny payloads, and Android apps can't use it. Raven is a custom mesh over BLE connections, the same approach bitchat takes.
 
 ### F3 — Flooding images clogs the mesh
 Each phone forwards every packet to each of its links. In a crowd of 30 phones, one 50 KB photo costs roughly **4–5 MB of radio time**. Realistic BLE speed is tens of KB/s at best, shared across all links, so one photo could jam the mesh for minutes. → Q9.
@@ -222,7 +222,7 @@ One real phone can't test Bluetooth between phones at all. The plan:
 | Q13 | Blocked contacts in groups (C9) | Still shown in groups | D51 |
 | Q14 | Test phones (F7) | Stay with 1 phone for now | D52 |
 | Q15 | bitchat compatibility (C7) | Never; independent protocol | D53 |
-| Q16 | Package name (C1) | Keep `app.huginn.mesh` as placeholder | D33 |
+| Q16 | Package name (C1) | Keep `app.raven.mesh` as placeholder | D33 |
 | Q17 | Hide packet type + padding (S2) | Approved (S2 had been missing from the first 16 questions) | D46 |
 | Q18 | Brand-neutral protocol identifiers (C1) | Approved | D47 |
 | Q19 | Group QR validity (new, found while writing v0.2) | While on screen, max 5 min | D40 |

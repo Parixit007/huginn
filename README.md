@@ -1,7 +1,7 @@
-# Huginn — Spec Sheet v0.3
+# Raven — Spec Sheet v0.3
 
 > Status: v0.1 approved by owner on 2026-10-07. v0.2 added the decisions from **Audit #1** (`AUDIT.md`). v0.3 **removes group chats from v1** (owner decision, same day; the group design is parked in §14). **No code yet.**
-> Name: **Huginn** (working name), Odin's raven "Thought". It flies across the nine worlds and returns to whisper what it heard. The name can change at any time before public release, because protocol identifiers are brand-neutral (D47). The project folder is still named `Hopper`.
+> Name: **Raven** (working name, D94; it replaced the earlier working name Huginn, Odin's raven "Thought"). The name can change at any time before public release, because protocol identifiers are brand-neutral (D47). The project folder is still named `Hopper`.
 >
 > Legend: ✅ = decided by owner · 🟡 = proposal, needs owner OK · ❓ = open question · ⚠️ = known v1 limitation · ⏸ = decided but parked (not in v1)
 
@@ -23,7 +23,7 @@ An offline-first, end-to-end encrypted Android messenger (in the spirit of bitch
 | D4 | Network | Bluetooth LE only. **Never** internet. | ✅ |
 | D5 | Routing | Multi-hop mesh relaying | ✅ |
 | D6 | Relay store-and-forward | ~~No~~ → superseded by D65 (store-and-forward is in v1) | ✅ |
-| D7 | Who relays | Every Huginn phone relays for everyone (encrypted blobs only) | ✅ |
+| D7 | Who relays | Every Raven phone relays for everyone (encrypted blobs only) | ✅ |
 | D8 | Hop limit | **8 hops**: a message crosses at most 8 links from sender to receiver | ✅ |
 | D9 | Offline send | Message queues on the **sender's** phone as "pending" and auto-sends when the friend is reachable. Gives up after 3 days (D43). | ✅ |
 | D10 | Encryption v1 | **One static shared key per contact.** It is created by key agreement during QR pairing and never shown in the QR (updated by D37). Ratchet and identity keys come later. | ✅ |
@@ -48,8 +48,8 @@ An offline-first, end-to-end encrypted Android messenger (in the spirit of bitch
 | D29 | UI | Material 3, light + dark, English only (more languages later) | ✅ |
 | D30 | Removal v1 | Delete contact, block contact. (Leave group / kick are parked with groups.) | ✅ |
 | D31 | Avatar | 192×192, ≤ 20 KB. Sent after pairing; updates are pushed to contacts (D42). | ✅ |
-| D32 | App name | **Huginn**, working name. Can change at any time before public release. | ✅ (working) |
-| D33 | Package name | `app.huginn.mesh`, placeholder. Free to change until the first public release. | ✅ (placeholder) |
+| D32 | App name | ~~**Huginn**, working name. Can change at any time before public release.~~ → superseded by D94 | ✅ |
+| D33 | Package name | ~~`app.huginn.mesh`, placeholder. Free to change until the first public release.~~ → superseded by D94 | ✅ |
 | D34 | Packet IDs | Outer **packet ID** (new for every transmission; used by relays to drop duplicates) + inner encrypted **message ID** (same across retries) | ✅ (audit E1) |
 | D35 | Image transfer | Every chunk is its own packet; a manifest carries chunk count + image hash; the receiver requests missing chunks; "delivered" only after the full image is verified | ✅ (audit E2) |
 | D36 | Replay & ordering | Received message IDs stored per chat (unique). Per-sender counter for order and gaps. **No clock window.** Show the sender's time, sort by counter/arrival. | ✅ (audit E3) |
@@ -69,7 +69,7 @@ An offline-first, end-to-end encrypted Android messenger (in the spirit of bitch
 | D50 | Auto-start | The mesh starts by itself after a reboot (after the first unlock) | ✅ |
 | D51 | Block vs groups | A blocked person's group messages are still shown | ⏸ |
 | D52 | Test hardware | 1 real phone for now. ⚠️ The real BLE layer stays untested until 2–3 phones are available. | ✅ |
-| D53 | bitchat compatibility | Never. Huginn stays an independent protocol. | ✅ |
+| D53 | bitchat compatibility | Never. Raven stays an independent protocol. | ✅ |
 | D54 | Group chats | **Removed from v1.** The design is parked in §14. The version they return in will be decided later. | ✅ |
 | D55 | Group join check | Nickname only; no 6-digit code comparison for group joins | ⏸ |
 | D56 | Group creator leaving | The creator must pick a successor before leaving | ⏸ |
@@ -108,8 +108,9 @@ An offline-first, end-to-end encrypted Android messenger (in the spirit of bitch
 | D89 | Permission timing | Bluetooth + notifications during onboarding, each with an explanation; camera at the first QR scan | ✅ |
 | D90 | Owner's phone | Xiaomi Redmi Note 6 Pro, **Android 9**, no security updates since 2020-11: used for testing too (overrides D81's Android 13+ limit for this device); Android 8–12 stay supported | ✅ |
 | D91 | Test tooling on Android 17 | Device UI tests pin Espresso 3.7.0 (test-only, never in the app): the 3.5.0 that Compose's test kit brings crashes on Android 17 | ✅ |
-| D92 | UI tests on the owner's MIUI phone | MIUI blocks test screens by default; before a phone run, the "Display pop-up windows while running in the background" permission is switched on for the Huginn debug build only, via adb, and switched back off after the run | ✅ |
+| D92 | UI tests on the owner's MIUI phone | MIUI blocks test screens by default; before a phone run, the "Display pop-up windows while running in the background" permission is switched on for the Raven debug build only, via adb, and switched back off after the run | ✅ |
 | D93 | Colours | Lime accent on every phone, like WhatsApp's green (owner decision 2026-10-09; supersedes D83). All Material 3 roles built from the icon's lime #C3E24F; follows light/dark. Plain top bar; lime + button, send button, avatars, unread badges and main buttons, all with dark text; my bubbles pale lime (deep olive in dark mode); small text accents deep lime-olive #516601 in light mode, since lime text on white is unreadable (1.4:1) | ✅ |
+| D94 | Name: **Raven** | Renamed everywhere (owner decision 2026-10-09; supersedes D32/D33): launcher label and on-screen text, package ID `app.raven.mesh`, code packages `app.raven.*`, docs. Still a working name until a trademark check (open item). Protocol identifiers unchanged (D47). The owner renames the GitHub repo `huginn` | ✅ (working) |
 
 ## 3. Features (v1)
 
@@ -122,7 +123,7 @@ An offline-first, end-to-end encrypted Android messenger (in the spirit of bitch
 - **Contacts**: delete, block, re-scan to re-pair (replaces the old key).
 - **Background**: the mesh service keeps receiving and relaying with the app closed, and starts again after a reboot.
 - **Notifications**: show the sender's name only.
-- **Nearby indicator**: the number of Huginn phones directly connected (no identities shown).
+- **Nearby indicator**: the number of Raven phones directly connected (no identities shown).
 
 ## 4. Cryptography (v1)
 
@@ -216,7 +217,7 @@ An offline-first, end-to-end encrypted Android messenger (in the spirit of bitch
 
 **Not protected against in v1** ⚠️:
 - A Bluetooth sniffer seeing **who talks to whom and when** (plain device IDs, D14), and following your static ID across places **while you are sending**.
-- Anyone detecting that **a phone runs Huginn** (the BLE advertisement).
+- Anyone detecting that **a phone runs Raven** (the BLE advertisement).
 - A leaked contact key exposing that chat's **past and future** messages (no forward secrecy).
 - Someone holding your **unlocked** phone (no app lock or panic wipe yet).
 - Forensic tools on a **locked but powered-on** phone (the DB is usable after the first unlock).
@@ -262,8 +263,8 @@ An offline-first, end-to-end encrypted Android messenger (in the spirit of bitch
 
 ## 13. Open questions
 
-1. ❓ Final app name (working name: Huginn) + trademark check, before public release.
-2. ❓ Package name (placeholder `app.huginn.mesh`), before public release.
+1. ❓ Final app name (working name: Raven) + trademark check, before public release.
+2. ❓ Package name (placeholder `app.raven.mesh`), before public release.
 3. ❓ Distribution: Play Store / F-Droid / APK (affects some permission policies), before release.
 4. ❓ Tuning values, to be set during the build: max links, retry backoff, padding sizes, chunk size, ack timeout.
 

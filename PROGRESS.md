@@ -21,14 +21,14 @@ One entry per build-plan step: what was done, files, test results, decisions. Ne
 - 8 modules from spec §10:
   - Kotlin/JVM: `:core:model`, `:core:crypto`, `:core:mesh`, `:core:transport`, `:transport:fake`
   - Android library: `:transport:ble`, `:data`
-  - Android app: `:app` (Compose; shows "Huginn")
+  - Android app: `:app` (Compose; shows "Raven")
 - `minSdk` 26, `compileSdk`/`targetSdk` 37, Java 17 bytecode.
-- Code packages: `app.huginn.*`; application ID `app.huginn.mesh` (placeholder, D33).
+- Code packages: `app.raven.*`; application ID `app.raven.mesh` (placeholder, D33).
 - Files: `settings.gradle.kts`, `build.gradle.kts`, `gradle.properties`, `gradle/libs.versions.toml`, `gradle/wrapper/*`, `gradlew`, `gradlew.bat`, module `build.gradle.kts` files, `app/src/main/**`, `app/proguard-rules.pro`.
 
 ### 0.4 Build guards ✅
 - **No-internet guard:** `verifyReleaseNoInternet` reads the merged release manifest and fails the build if `android.permission.INTERNET` is present.
-  - Proven: adding the permission → *"Huginn must never use the internet."* → build failed. The manifest was restored afterwards.
+  - Proven: adding the permission → *"Raven must never use the internet."* → build failed. The manifest was restored afterwards.
 - **Backups off:** `allowBackup=false`, `fullBackupContent` rules (Android 8–11), `dataExtractionRules` (Android 12+: cloud backup and device transfer).
 - **Dependency verification:** `gradle/verification-metadata.xml` holds the SHA-256 of 422 components, plus Linux/Windows `aapt2` entries for CI and Windows developers.
   - Proven: one checksum altered → *"Dependency verification failed … kotlin-stdlib-2.4.20.jar"*; passes again after restoring.
@@ -241,7 +241,7 @@ Gate decisions: D82 "Not confirmed yet — retry?", D84 home screen, D85 raven i
 
 ### 4.1 Navigation and theme ✅
 - One activity, Navigation Compose: chats → chat → contact; show QR; scan; profile.
-- Material 3 in Huginn's lime on every phone (D93), light and dark. All 48 colour roles come from `res/values` and `res/values-night`, shared with a new window theme (the cursor of the message field, the launch background, status bar icons).
+- Material 3 in Raven's lime on every phone (D93), light and dark. All 48 colour roles come from `res/values` and `res/values-night`, shared with a new window theme (the cursor of the message field, the launch background, status bar icons).
 - Raven launcher icon (adaptive, plus a monochrome version) and a notification icon (D85).
 
 ### 4.2 Onboarding ✅
@@ -281,3 +281,10 @@ Gate decisions: D82 "Not confirmed yet — retry?", D84 home screen, D85 raven i
 ### Still open in Phase 4
 - 👤 Your hands-on check on your phone: onboarding, your QR, profile, contacts (the build plan's "Done when"). Chatting by hand moves to Phase 5.
 - Observation for Phase 6 (performance): the first start after install shows a spinner for about 2–5 s on the emulator while the encrypted database opens.
+
+### Rename to Raven (D94, 2026-10-09) ✅
+- Launcher label and all on-screen text, package ID `app.raven.mesh`, Kotlin packages `app.raven.*` (13 source folders moved), class names (`RavenApplication`, `RavenRoot`, `RavenTheme`, `Theme.Raven`), Gradle project name, the spike app, and the docs. D32/D33 are marked superseded; the earlier name stays in the decision log as history, and in the audit's historical findings.
+- Unchanged on purpose: protocol identifiers (D47), database and key file names, Keystore aliases. Checked by diffing every renamed file: only names, packages and on-screen text changed.
+- Clean strict build, 90 JVM tests and the 18 device tests on the Android 17 emulator all pass.
+- Clean install of `app.raven.mesh` on the owner's phone (the old `app.huginn.mesh` was removed) and on the virtual phone.
+- 👤 Left for the owner: rename the GitHub repo `huginn` → `raven` (GitHub redirects the old URL). The repo name in BUILD_PLAN P1 and the progress log will be updated after that.

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Huginn's colours in dark mode (D93). On dark backgrounds the lime itself is readable, so it is the accent. -->
+<!-- Raven's colours in dark mode (D93). On dark backgrounds the lime itself is readable, so it is the accent. -->
 <resources>
     <color name="theme_primary">#C3E24F</color>
     <color name="theme_on_primary">#2A3400</color>

@@ -4,7 +4,7 @@ plugins {
 }
 
 android {
-    namespace = "app.huginn.data"
+    namespace = "app.raven.data"
     compileSdk = 37
 
     defaultConfig {

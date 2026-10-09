@@ -1,4 +1,4 @@
-# Huginn — Build Plan v0.2
+# Raven — Build Plan v0.2
 
 > Builds the v1 described in `README.md` (spec v0.3: 1-to-1 chats only). Phase order approved by owner on 2026-10-07.
 > Legend: ✅ = decided by owner · 🟡 = proposal, needs owner OK · ⚠️ = risk · 👤 = needs you to do something
@@ -119,7 +119,7 @@ Module: `:app`.
 
 | Step | What |
 |---|---|
-| 4.1 | Navigation, Material 3 theme (light/dark) in Huginn's lime (D93). |
+| 4.1 | Navigation, Material 3 theme (light/dark) in Raven's lime (D93). |
 | 4.2 | Onboarding: nickname; avatar (192 px, ≤ 20 KB); device ID; permission explainers per Android version; battery-settings guide. |
 | 4.3 | Contacts: list, delete, block, re-pair. |
 | 4.4 | Pairing: show QR, scan with the in-app camera (CameraX + ZXing), compare codes, Accept/Reject (tapjacking-safe), countdown to expiry. |
@@ -188,6 +188,6 @@ Modules: `:transport:ble`, plus the service in `:app`.
 | P4 | Phases 4–5 | Test aids: **Mac as a Bluetooth test peer** (Python radio + our Kotlin core). No simulated friends in debug builds. | ✅ |
 | P5 | Phase 6 | Who creates and keeps the release signing key (recommended: you, with an offline backup) | later |
 | P6 | Phase 0 | **The owner makes all commits and pushes**; I only report when a step is ready | ✅ |
-| P7 | Phase 0 | Copyright holder name in the MIT `LICENSE` (your name, a handle, or "Huginn contributors") | ⏳ |
+| P7 | Phase 0 | Copyright holder name in the MIT `LICENSE` (your name, a handle, or "Raven contributors") | ⏳ |
 | P8 | Phase 5 | Python Bluetooth libraries for the Mac peer (proposal: `bleak` for scanning/connecting, `bless` for advertising) | later |
 | P9 | Phase 0 | No AI-tool names or attribution anywhere in the repo; local-only working files excluded via `.git/info/exclude` | ✅ |

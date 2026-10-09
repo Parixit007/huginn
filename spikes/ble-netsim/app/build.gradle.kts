@@ -3,11 +3,11 @@ plugins {
 }
 
 android {
-    namespace = "app.huginn.spike.ble"
+    namespace = "app.raven.spike.ble"
     compileSdk = 37
 
     defaultConfig {
-        applicationId = "app.huginn.spike.ble"
+        applicationId = "app.raven.spike.ble"
         minSdk = 26
         targetSdk = 37
         versionCode = 1

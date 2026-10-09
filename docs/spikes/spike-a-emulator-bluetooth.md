@@ -46,7 +46,7 @@ emulator -avd Medium_Phone_API_37.0 -read-only -no-snapshot -no-window -port 555
 ./gradlew -p spikes/ble-netsim assembleDebug
 adb -s emulator-5554 install -r -g spikes/ble-netsim/app/build/outputs/apk/debug/app-debug.apk
 adb -s emulator-5556 install -r -g spikes/ble-netsim/app/build/outputs/apk/debug/app-debug.apk
-adb -s emulator-5554 shell am start -S -n app.huginn.spike.ble/.SpikeActivity --es mode peripheral
-adb -s emulator-5556 shell am start -S -n app.huginn.spike.ble/.SpikeActivity --es mode central
-adb -s emulator-5556 logcat -s HuginnSpike
+adb -s emulator-5554 shell am start -S -n app.raven.spike.ble/.SpikeActivity --es mode peripheral
+adb -s emulator-5556 shell am start -S -n app.raven.spike.ble/.SpikeActivity --es mode central
+adb -s emulator-5556 logcat -s RavenSpike
 ```

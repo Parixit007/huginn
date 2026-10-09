@@ -3,7 +3,7 @@ plugins {
 }
 
 android {
-    namespace = "app.huginn.transport.ble"
+    namespace = "app.raven.transport.ble"
     compileSdk = 37
 
     defaultConfig {
